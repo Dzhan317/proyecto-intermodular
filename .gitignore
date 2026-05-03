@@ -1,0 +1,17 @@
+# Credenciales — nunca exponer
+primelux-smartshop/config/config.php
+primelux-smartshop/config/config.local.php
+
+# OS y editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# PHP
+*.log
+/vendor/
+
+# Node (si se usa en local para Tailwind)
+node_modules/
