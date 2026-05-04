@@ -13,13 +13,15 @@ $router->get('/products/:slug', 'ProductController@show');
 $router->get('/category/:slug', 'CategoryController@show');
 
 // Autenticación
-$router->get( '/login',      'AuthController@loginForm');
-$router->post('/login',      'AuthController@login');
-$router->get( '/register',   'AuthController@registerForm');
-$router->post('/register',   'AuthController@register');
-$router->get( '/logout',     'AuthController@logout');
-$router->get( '/verify-2fa', 'AuthController@verify2faForm');
-$router->post('/verify-2fa', 'AuthController@verify2fa');
+$router->get( '/login',                  'AuthController@loginForm');
+$router->post('/auth/check-email',       'AuthController@checkEmail');
+$router->get( '/login/password',         'AuthController@passwordForm');
+$router->post('/login',                  'AuthController@login');
+$router->get( '/register',               'AuthController@registerForm');
+$router->post('/register',               'AuthController@register');
+$router->get( '/logout',                 'AuthController@logout');
+$router->get( '/verify-2fa',             'AuthController@verify2faForm');
+$router->post('/verify-2fa',             'AuthController@verify2fa');
 $router->get( '/forgot-password',        'AuthController@forgotPasswordForm');
 $router->post('/forgot-password',        'AuthController@forgotPassword');
 $router->get( '/reset-password/:token',  'AuthController@resetPasswordForm');
