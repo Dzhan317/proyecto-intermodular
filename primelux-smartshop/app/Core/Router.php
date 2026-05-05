@@ -1,32 +1,21 @@
 <?php
 declare(strict_types=1);
 
-/*
- * Recibe la URL de la petición y la mapea al controlador correcto.
- * Soporta parámetros dinámicos en la URL (ej: /productos/:slug).
+/**
+ * Router
+ * Maps incoming HTTP requests to Controller@method handlers.
+ * Supports named URL parameters via /:param syntax.
  */
-
 class Router
 {
     private array $routes = [];
 
-    public function get(string $path, string $handler): void
-    {
-        $this->addRoute('GET', $path, $handler);
-    }
-
-    public function post(string $path, string $handler): void
-    {
-        $this->addRoute('POST', $path, $handler);
-    }
+    public function get(string $path, string $handler): void  { $this->addRoute('GET',  $path, $handler); }
+    public function post(string $path, string $handler): void { $this->addRoute('POST', $path, $handler); }
 
     private function addRoute(string $method, string $path, string $handler): void
     {
-        $this->routes[] = [
-            'method'  => $method,
-            'path'    => $path,
-            'handler' => $handler,
-        ];
+        $this->routes[] = ['method' => $method, 'path' => $path, 'handler' => $handler];
     }
 
     public function dispatch(): void
@@ -37,7 +26,6 @@ class Router
 
         foreach ($this->routes as $route) {
             $pattern = $this->buildPattern($route['path']);
-
             if ($route['method'] === $method && preg_match($pattern, $uri, $matches)) {
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
                 $this->callHandler($route['handler'], $params);
@@ -59,11 +47,7 @@ class Router
     {
         [$controllerName, $method] = explode('@', $handler);
         $file = APP_PATH . '/Controllers/' . $controllerName . '.php';
-
-        if (!file_exists($file)) {
-            throw new \RuntimeException("Controller not found: {$controllerName}");
-        }
-
+        if (!file_exists($file)) throw new \RuntimeException("Controller not found: {$controllerName}");
         require_once $file;
         $controller = new $controllerName();
         $controller->$method($params);
@@ -72,10 +56,7 @@ class Router
     private function render404(): void
     {
         $view = APP_PATH . '/Views/errors/404.php';
-        if (file_exists($view)) {
-            require_once $view;
-        } else {
-            echo '<h1>404 — Page not found</h1>';
-        }
+        if (file_exists($view)) require_once $view;
+        else echo '<h1>404 &mdash; Page not found</h1>';
     }
 }

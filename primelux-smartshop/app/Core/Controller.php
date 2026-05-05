@@ -1,23 +1,17 @@
 <?php
 declare(strict_types=1);
 
-/*
- * Clase base de la que heredan todos los controladores.
- * Proporciona métodos comunes: renderizar vistas, redirigir, responder JSON,
- * proteger rutas por rol y validar tokens CSRF.
+/**
+ * Controller (Base)
+ * All controllers extend this class.
  */
-
 abstract class Controller
 {
     protected function view(string $view, array $data = []): void
     {
         extract($data);
         $viewFile = APP_PATH . '/Views/' . str_replace('.', '/', $view) . '.php';
-
-        if (!file_exists($viewFile)) {
-            throw new \RuntimeException("Vista no encontrada: {$view}");
-        }
-
+        if (!file_exists($viewFile)) throw new \RuntimeException("View not found: {$view}");
         require_once $viewFile;
     }
 
@@ -35,29 +29,17 @@ abstract class Controller
         exit;
     }
 
-    protected function isPost(): bool
-    {
-        return $_SERVER['REQUEST_METHOD'] === 'POST';
-    }
-
-    protected function isLoggedIn(): bool
-    {
-        return isset($_SESSION['user_id']);
-    }
+    protected function isLoggedIn(): bool  { return isset($_SESSION['user_id']); }
 
     protected function requireAuth(): void
     {
-        if (!$this->isLoggedIn()) {
-            $this->redirect(APP_URL . '/login');
-        }
+        if (!$this->isLoggedIn()) $this->redirect(APP_URL . '/login');
     }
 
     protected function requireAdmin(): void
     {
         $this->requireAuth();
-        if (($_SESSION['user_role'] ?? '') !== 'admin') {
-            $this->redirect(APP_URL . '/');
-        }
+        if (($_SESSION['user_role'] ?? '') !== 'admin') $this->redirect(APP_URL . '/');
     }
 
     protected function csrfToken(): string
@@ -73,7 +55,7 @@ abstract class Controller
         $token = $_POST[CSRF_TOKEN_NAME] ?? '';
         if (!hash_equals($_SESSION[CSRF_TOKEN_NAME] ?? '', $token)) {
             http_response_code(403);
-            exit('Token CSRF inválido.');
+            exit('Invalid CSRF token.');
         }
     }
 }
