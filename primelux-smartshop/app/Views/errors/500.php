@@ -1,4 +1,3 @@
-<!-- Página mostrada cuando ocurre un error interno del servidor. -->
 <!DOCTYPE html>
 <html lang="es">
 <head>

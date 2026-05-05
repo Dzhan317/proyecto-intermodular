@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-/*
- * Gestiona la conexión a la base de datos mediante PDO.
- * Usa el patrón singleton para mantener una sola conexión por petición.
+/**
+ * Database
+ * PDO singleton. One connection per request.
+ * Usage: $pdo = Database::getInstance();
  */
-
 class Database
 {
     private static ?PDO $instance = null;

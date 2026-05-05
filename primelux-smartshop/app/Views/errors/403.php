@@ -1,4 +1,3 @@
-<!-- Página mostrada cuando el usuario no tiene permisos para acceder. -->
 <!DOCTYPE html>
 <html lang="es">
 <head>

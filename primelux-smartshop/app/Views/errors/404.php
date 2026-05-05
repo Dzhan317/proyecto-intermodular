@@ -1,4 +1,3 @@
-<!-- Página mostrada cuando la ruta solicitada no existe. -->
 <!DOCTYPE html>
 <html lang="es">
 <head>

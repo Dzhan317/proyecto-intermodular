@@ -13,6 +13,7 @@ ob_start();
 <form method="POST" action="<?= APP_URL ?>/login" novalidate>
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
 
+    <!-- Email (solo lectura) -->
     <div class="mb-4">
         <label class="block text-sm text-[#9CA3AF] mb-2">Correo electrónico</label>
         <div class="flex items-center justify-between bg-[#111827] border border-[#374151]
@@ -26,6 +27,7 @@ ob_start();
         <input type="hidden" name="email" value="<?= htmlspecialchars($email) ?>">
     </div>
 
+    <!-- Contraseña -->
     <div class="mb-2">
         <label for="password" class="block text-sm text-[#9CA3AF] mb-2">Contraseña</label>
         <div class="relative">
