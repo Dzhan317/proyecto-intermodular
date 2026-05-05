@@ -10,9 +10,7 @@
     <div class="text-center">
         <h1 class="text-8xl font-bold text-[#2563EB] mb-4">404</h1>
         <p class="text-xl text-gray-400 mb-8">La página que buscas no existe.</p>
-        <a href="<?= APP_URL ?>" class="bg-[#2563EB] hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition">
-            Volver al inicio
-        </a>
+        <a href="<?= APP_URL ?>" class="bg-[#2563EB] hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition">Volver al inicio</a>
     </div>
 </body>
 </html>
