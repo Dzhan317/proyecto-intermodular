@@ -22,6 +22,7 @@ ob_start();
     <?php unset($_SESSION['twofa_success']); ?>
 <?php endif; ?>
 
+<!-- Temporizador de expiración -->
 <div class="flex items-center justify-center gap-2 mb-5">
     <div class="w-2 h-2 rounded-full bg-[#10B981]" id="timerDot"></div>
     <span class="text-[#9CA3AF] text-sm">
@@ -32,9 +33,13 @@ ob_start();
 <form method="POST" action="<?= APP_URL ?>/verify-2fa" id="twoFaForm" novalidate>
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
     <input type="hidden" name="code" id="codeHidden">
+
     <div id="codeInputs" class="flex justify-center gap-3 mb-6">
         <?php for ($i = 0; $i < 6; $i++): ?>
-            <input type="text" inputmode="numeric" maxlength="1" data-index="<?= $i ?>"
+            <input type="text"
+                   inputmode="numeric"
+                   maxlength="1"
+                   data-index="<?= $i ?>"
                    autocomplete="<?= $i === 0 ? 'one-time-code' : 'off' ?>"
                    class="w-12 h-14 bg-[#111827] text-white text-center text-2xl font-bold
                           border-2 border-[#374151] rounded-xl
@@ -42,6 +47,7 @@ ob_start();
                           transition-colors duration-150 caret-transparent">
         <?php endfor; ?>
     </div>
+
     <button type="submit" id="submitBtn" disabled
             class="w-full bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF]
                    text-white font-semibold py-3 rounded-xl text-sm
@@ -64,34 +70,64 @@ ob_start();
 </form>
 
 <div class="text-center mt-4">
-    <a href="<?= APP_URL ?>/login" class="text-[#6B7280] hover:text-[#9CA3AF] text-xs transition-colors">
+    <a href="<?= APP_URL ?>/login"
+       class="text-[#6B7280] hover:text-[#9CA3AF] text-xs transition-colors">
         ← Volver al inicio de sesión
     </a>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     initTwoFactorInputs('codeInputs', 'codeHidden', 'submitBtn', 'twoFaForm');
+
+    // Temporizador de expiración del código
     var expiryMs  = <?= (int) $expiryMs ?>;
     var startTime = Date.now();
     var dot       = document.getElementById('timerDot');
     var countdown = document.getElementById('countdown');
+
     function updateExpiry() {
-        var elapsed = Date.now() - startTime;
+        var elapsed   = Date.now() - startTime;
         var remaining = Math.max(0, expiryMs - elapsed);
-        countdown.textContent = Math.floor(remaining/60000) + ':' + String(Math.floor((remaining%60000)/1000)).padStart(2,'0');
-        if (remaining <= 60000) { countdown.style.color='#EF4444'; if(dot) dot.style.background='#EF4444'; }
-        if (remaining === 0) { countdown.textContent='Expirado'; clearInterval(expiryInterval); }
+        var mins      = Math.floor(remaining / 60000);
+        var secs      = Math.floor((remaining % 60000) / 1000);
+
+        countdown.textContent = mins + ':' + String(secs).padStart(2, '0');
+
+        if (remaining <= 60000) {
+            countdown.style.color = '#EF4444';
+            if (dot) dot.style.background = '#EF4444';
+        }
+
+        if (remaining === 0) {
+            countdown.textContent = 'Expirado';
+            clearInterval(expiryInterval);
+        }
     }
+
     updateExpiry();
     var expiryInterval = setInterval(updateExpiry, 1000);
-    var resendBtn=document.getElementById('resendBtn'), resendTimer=document.getElementById('resendTimer'), remaining=<?= (int) $cooldownSec ?>;
+
+    // Cooldown del botón de reenvío
+    var resendBtn   = document.getElementById('resendBtn');
+    var resendTimer = document.getElementById('resendTimer');
+    var remaining   = <?= (int) $cooldownSec ?>;
+
     function updateResend() {
-        if (remaining <= 0) { resendBtn.disabled=false; resendTimer.textContent=''; clearInterval(resendInterval); return; }
-        resendTimer.textContent='('+remaining+'s)'; remaining--;
+        if (remaining <= 0) {
+            resendBtn.disabled      = false;
+            resendTimer.textContent = '';
+            clearInterval(resendInterval);
+            return;
+        }
+        resendTimer.textContent = '(' + remaining + 's)';
+        remaining--;
     }
+
     updateResend();
     var resendInterval = setInterval(updateResend, 1000);
+
 });
 </script>
 

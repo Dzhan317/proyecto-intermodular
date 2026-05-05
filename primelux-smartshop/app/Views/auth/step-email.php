@@ -1,8 +1,9 @@
 <?php
 /*
  * Paso 1 del login: el usuario introduce su email.
- * Si el email existe -> pantalla de contraseña. Si no -> registro.
- * El mensaje de error es siempre idéntico (evita enumeración de usuarios).
+ * Si el email existe → pantalla de contraseña.
+ * Si no existe → pantalla de registro.
+ * En ambos casos el mensaje de error es idéntico (evita enumeración de usuarios).
  */
 $pageTitle = 'Acceder — PrimeLux SmartShop';
 ob_start();
@@ -16,6 +17,7 @@ ob_start();
 <form method="POST" action="<?= APP_URL ?>/auth/check-email" novalidate>
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
 
+    <!-- Email -->
     <div class="mb-4">
         <label for="email" class="block text-sm text-[#9CA3AF] mb-2">Correo electrónico</label>
         <div class="relative">
@@ -23,14 +25,18 @@ ob_start();
                 <img src="<?= APP_URL ?>/assets/img/icons/sobre.svg"
                      alt="" class="w-4 h-4" style="filter: invert(60%) sepia(0%) saturate(0%);">
             </span>
-            <input type="email" id="email" name="email"
-                   value="<?= htmlspecialchars($email ?? '') ?>"
-                   placeholder="tu@correo.com"
-                   autocomplete="email" required
-                   class="w-full bg-[#111827] text-white placeholder-[#6B7280] border border-[#374151]
-                          rounded-xl pl-10 pr-4 py-3 text-sm
-                          focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]
-                          transition-colors">
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="<?= htmlspecialchars($email ?? '') ?>"
+                placeholder="tu@correo.com"
+                autocomplete="email"
+                required
+                class="w-full bg-[#111827] text-white placeholder-[#6B7280] border border-[#374151]
+                       rounded-xl pl-10 pr-4 py-3 text-sm
+                       focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]
+                       transition-colors">
         </div>
     </div>
 

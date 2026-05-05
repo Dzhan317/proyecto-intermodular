@@ -4,14 +4,24 @@ declare(strict_types=1);
 /**
  * Controller (Base)
  * All controllers extend this class.
+ * Provides view rendering, redirects, JSON responses and auth guards.
  */
 abstract class Controller
 {
+    /**
+     * Render a view file.
+     * Dot notation maps to subdirectory: 'auth.login' -> Views/auth/login.php
+     */
     protected function view(string $view, array $data = []): void
     {
         extract($data);
+
         $viewFile = APP_PATH . '/Views/' . str_replace('.', '/', $view) . '.php';
-        if (!file_exists($viewFile)) throw new \RuntimeException("View not found: {$view}");
+
+        if (!file_exists($viewFile)) {
+            throw new \RuntimeException("View not found: {$view}");
+        }
+
         require_once $viewFile;
     }
 
@@ -29,19 +39,37 @@ abstract class Controller
         exit;
     }
 
-    protected function isLoggedIn(): bool  { return isset($_SESSION['user_id']); }
-
-    protected function requireAuth(): void
+    protected function isPost(): bool
     {
-        if (!$this->isLoggedIn()) $this->redirect(APP_URL . '/login');
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 
+    protected function isLoggedIn(): bool
+    {
+        return isset($_SESSION['user_id']);
+    }
+
+    /** Redirect to login if not authenticated. */
+    protected function requireAuth(): void
+    {
+        if (!$this->isLoggedIn()) {
+            $this->redirect(APP_URL . '/login');
+        }
+    }
+
+    /** Redirect to home if not admin. */
     protected function requireAdmin(): void
     {
         $this->requireAuth();
-        if (($_SESSION['user_role'] ?? '') !== 'admin') $this->redirect(APP_URL . '/');
+        if (($_SESSION['user_role'] ?? '') !== 'admin') {
+            $this->redirect(APP_URL . '/');
+        }
     }
 
+    /**
+     * Generate and store a CSRF token in the session.
+     * Use in views: <input type="hidden" name="csrf_token" value="<?= $this->csrfToken() ?>">
+     */
     protected function csrfToken(): string
     {
         if (empty($_SESSION[CSRF_TOKEN_NAME])) {
@@ -50,6 +78,7 @@ abstract class Controller
         return $_SESSION[CSRF_TOKEN_NAME];
     }
 
+    /** Validate the CSRF token from a POST request. Exits on failure. */
     protected function validateCsrf(): void
     {
         $token = $_POST[CSRF_TOKEN_NAME] ?? '';

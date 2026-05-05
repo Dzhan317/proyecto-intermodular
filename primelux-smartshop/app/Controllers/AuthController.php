@@ -24,7 +24,10 @@ class AuthController extends Controller
     public function loginForm(array $params): void
     {
         if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
+
+        // Mensaje de confirmación tras restablecer contraseña
         $success = isset($_GET['reset']) ? 'Contraseña actualizada correctamente. Inicia sesión.' : '';
+
         $this->view('auth.step-email', [
             'csrfToken' => $this->csrfToken(),
             'email'     => $_SESSION['auth_email'] ?? '',
@@ -35,124 +38,264 @@ class AuthController extends Controller
     public function checkEmail(array $params): void
     {
         $this->validateCsrf();
+
         $email = trim(strtolower($_POST['email'] ?? ''));
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->view('auth.step-email', ['csrfToken' => $this->csrfToken(), 'error' => 'Introduce un correo electrónico válido.', 'email' => $email]);
+            $this->view('auth.step-email', [
+                'csrfToken' => $this->csrfToken(),
+                'error'     => 'Introduce un correo electrónico válido.',
+                'email'     => $email,
+            ]);
             return;
         }
+
         $_SESSION['auth_email'] = $email;
+
         $userModel = new UserModel();
-        if ($userModel->findByEmail($email)) { $this->redirect(APP_URL . '/login/password'); }
-        else { $this->redirect(APP_URL . '/register'); }
+        if ($userModel->findByEmail($email)) {
+            $this->redirect(APP_URL . '/login/password');
+        } else {
+            $this->redirect(APP_URL . '/register');
+        }
     }
 
     public function passwordForm(array $params): void
     {
         if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
         if (empty($_SESSION['auth_email'])) $this->redirect(APP_URL . '/login');
-        $this->view('auth.login', ['csrfToken' => $this->csrfToken(), 'email' => $_SESSION['auth_email']]);
+
+        $this->view('auth.login', [
+            'csrfToken' => $this->csrfToken(),
+            'email'     => $_SESSION['auth_email'],
+        ]);
     }
 
     public function login(array $params): void
     {
         $this->validateCsrf();
-        $email  = trim(strtolower($_POST['email'] ?? ''));
-        $result = $this->authService->login($email, $_POST['password'] ?? '', $_SERVER['REMOTE_ADDR'] ?? '');
+
+        $email    = trim(strtolower($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+        $ip       = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        $result = $this->authService->login($email, $password, $ip);
+
         if (!$result['success']) {
-            $this->view('auth.login', ['csrfToken' => $this->csrfToken(), 'email' => $email, 'error' => $result['error']]);
+            $this->view('auth.login', [
+                'csrfToken' => $this->csrfToken(),
+                'email'     => $email,
+                'error'     => $result['error'],
+            ]);
             return;
         }
+
         $user = $result['user'];
+
         unset($_SESSION['auth_email']);
         $_SESSION['pre_auth_user_id']    = $user['id'];
         $_SESSION['pre_auth_user_email'] = $user['email'];
         $_SESSION['pre_auth_user_name']  = $user['name'];
-        $sent = $this->twoFactorService->generateAndSend($user['id'], $user['email'], $user['name']);
-        if (!$sent['success']) $_SESSION['twofa_error'] = $sent['error'];
+
+        $sent = $this->twoFactorService->generateAndSend(
+            $user['id'],
+            $user['email'],
+            $user['name']
+        );
+
+        if (!$sent['success']) {
+            $_SESSION['twofa_error'] = $sent['error'];
+        }
+
         $this->redirect(APP_URL . '/verify-2fa');
     }
 
     public function verify2faForm(array $params): void
     {
-        if (empty($_SESSION['pre_auth_user_id'])) $this->redirect(APP_URL . '/login');
+        if (empty($_SESSION['pre_auth_user_id'])) {
+            $this->redirect(APP_URL . '/login');
+        }
+
         $this->view('auth.verify-2fa', [
             'csrfToken'   => $this->csrfToken(),
             'maskedEmail' => $this->maskEmail($_SESSION['pre_auth_user_email'] ?? ''),
             'error'       => $_SESSION['twofa_error'] ?? '',
         ]);
+
         unset($_SESSION['twofa_error']);
     }
 
     public function verify2fa(array $params): void
     {
         $this->validateCsrf();
-        if (empty($_SESSION['pre_auth_user_id'])) $this->redirect(APP_URL . '/login');
+
+        if (empty($_SESSION['pre_auth_user_id'])) {
+            $this->redirect(APP_URL . '/login');
+        }
+
         $userId = (int) $_SESSION['pre_auth_user_id'];
-        $result = $this->twoFactorService->verify($userId, preg_replace('/\D/', '', trim($_POST['code'] ?? '')));
-        if (!$result['success']) { $_SESSION['twofa_error'] = $result['error']; $this->redirect(APP_URL . '/verify-2fa'); }
+        $code   = preg_replace('/\D/', '', trim($_POST['code'] ?? ''));
+
+        $result = $this->twoFactorService->verify($userId, $code);
+
+        if (!$result['success']) {
+            $_SESSION['twofa_error'] = $result['error'];
+            $this->redirect(APP_URL . '/verify-2fa');
+        }
+
         $_SESSION['user_id']   = $userId;
         $_SESSION['user_role'] = $this->getUserRole($userId);
-        unset($_SESSION['pre_auth_user_id'], $_SESSION['pre_auth_user_email'], $_SESSION['pre_auth_user_name']);
+
+        unset(
+            $_SESSION['pre_auth_user_id'],
+            $_SESSION['pre_auth_user_email'],
+            $_SESSION['pre_auth_user_name']
+        );
+
         $this->redirect(APP_URL . '/');
     }
 
     public function resend2fa(array $params): void
     {
-        if (empty($_SESSION['pre_auth_user_id'])) $this->redirect(APP_URL . '/login');
-        $sent = $this->twoFactorService->generateAndSend((int)$_SESSION['pre_auth_user_id'], $_SESSION['pre_auth_user_email'] ?? '', $_SESSION['pre_auth_user_name'] ?? '');
-        if (!$sent['success']) $_SESSION['twofa_error'] = $sent['error'];
-        else $_SESSION['twofa_success'] = 'Se ha enviado un nuevo código a tu correo.';
+        if (empty($_SESSION['pre_auth_user_id'])) {
+            $this->redirect(APP_URL . '/login');
+        }
+
+        $sent = $this->twoFactorService->generateAndSend(
+            (int) $_SESSION['pre_auth_user_id'],
+            $_SESSION['pre_auth_user_email'] ?? '',
+            $_SESSION['pre_auth_user_name']  ?? ''
+        );
+
+        if (!$sent['success']) {
+            $_SESSION['twofa_error'] = $sent['error'];
+        } else {
+            $_SESSION['twofa_success'] = 'Se ha enviado un nuevo código a tu correo.';
+        }
+
         $this->redirect(APP_URL . '/verify-2fa');
     }
 
     public function registerForm(array $params): void
     {
         if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
-        $this->view('auth.register', ['csrfToken' => $this->csrfToken(), 'email' => $_SESSION['auth_email'] ?? '']);
+
+        $this->view('auth.register', [
+            'csrfToken' => $this->csrfToken(),
+            'email'     => $_SESSION['auth_email'] ?? '',
+        ]);
     }
 
     public function register(array $params): void
     {
         $this->validateCsrf();
-        $data = ['email' => trim(strtolower($_POST['email'] ?? '')), 'name' => trim($_POST['name'] ?? ''), 'last_name' => trim($_POST['last_name'] ?? ''), 'password' => $_POST['password'] ?? '', 'password_confirm' => $_POST['password_confirm'] ?? '', 'terms' => isset($_POST['terms'])];
+
+        $data = [
+            'email'            => trim(strtolower($_POST['email'] ?? '')),
+            'name'             => trim($_POST['name'] ?? ''),
+            'last_name'        => trim($_POST['last_name'] ?? ''),
+            'password'         => $_POST['password'] ?? '',
+            'password_confirm' => $_POST['password_confirm'] ?? '',
+            'terms'            => isset($_POST['terms']),
+        ];
+
         $result = $this->authService->register($data);
-        if (!$result['success']) { $this->view('auth.register', ['csrfToken' => $this->csrfToken(), 'email' => $data['email'], 'name' => $data['name'], 'lastName' => $data['last_name'], 'error' => $result['error']]); return; }
+
+        if (!$result['success']) {
+            $this->view('auth.register', [
+                'csrfToken' => $this->csrfToken(),
+                'email'     => $data['email'],
+                'name'      => $data['name'],
+                'lastName'  => $data['last_name'],
+                'error'     => $result['error'],
+            ]);
+            return;
+        }
+
         unset($_SESSION['auth_email']);
         $_SESSION['pre_auth_user_id']    = $result['user_id'];
         $_SESSION['pre_auth_user_email'] = $data['email'];
         $_SESSION['pre_auth_user_name']  = $data['name'];
-        $sent = $this->twoFactorService->generateAndSend($result['user_id'], $data['email'], $data['name']);
-        if (!$sent['success']) $_SESSION['twofa_error'] = $sent['error'];
+
+        $sent = $this->twoFactorService->generateAndSend(
+            $result['user_id'],
+            $data['email'],
+            $data['name']
+        );
+
+        if (!$sent['success']) {
+            $_SESSION['twofa_error'] = $sent['error'];
+        }
+
         $this->redirect(APP_URL . '/verify-2fa');
     }
 
-    public function logout(array $params): void { session_destroy(); $this->redirect(APP_URL . '/login'); }
+    public function logout(array $params): void
+    {
+        session_destroy();
+        $this->redirect(APP_URL . '/login');
+    }
 
-    public function forgotPasswordForm(array $params): void { $this->view('auth.forgot-password', ['csrfToken' => $this->csrfToken()]); }
+    public function forgotPasswordForm(array $params): void
+    {
+        $this->view('auth.forgot-password', [
+            'csrfToken' => $this->csrfToken(),
+        ]);
+    }
 
     public function forgotPassword(array $params): void
     {
         $this->validateCsrf();
-        $this->authService->sendPasswordReset(trim(strtolower($_POST['email'] ?? '')));
-        $this->view('auth.forgot-password', ['csrfToken' => $this->csrfToken(), 'success' => 'Si el correo está registrado, recibirás un enlace en breve.', 'email' => '']);
+
+        $email = trim(strtolower($_POST['email'] ?? ''));
+        $this->authService->sendPasswordReset($email);
+
+        $this->view('auth.forgot-password', [
+            'csrfToken' => $this->csrfToken(),
+            'success'   => 'Si el correo está registrado, recibirás un enlace en breve.',
+            'email'     => '',
+        ]);
     }
 
-    public function resetPasswordForm(array $params): void { $this->view('auth.reset-password', ['csrfToken' => $this->csrfToken(), 'token' => $params['token'] ?? '']); }
+    public function resetPasswordForm(array $params): void
+    {
+        $this->view('auth.reset-password', [
+            'csrfToken' => $this->csrfToken(),
+            'token'     => $params['token'] ?? '',
+        ]);
+    }
 
     public function resetPassword(array $params): void
     {
         $this->validateCsrf();
+
         $token  = $params['token'] ?? '';
-        $result = $this->authService->resetPassword($token, $_POST['password'] ?? '', $_POST['password_confirm'] ?? '');
-        if (!$result['success']) { $this->view('auth.reset-password', ['csrfToken' => $this->csrfToken(), 'token' => $token, 'error' => $result['error']]); return; }
+        $result = $this->authService->resetPassword(
+            $token,
+            $_POST['password'] ?? '',
+            $_POST['password_confirm'] ?? ''
+        );
+
+        if (!$result['success']) {
+            $this->view('auth.reset-password', [
+                'csrfToken' => $this->csrfToken(),
+                'token'     => $token,
+                'error'     => $result['error'],
+            ]);
+            return;
+        }
+
         $this->redirect(APP_URL . '/login?reset=1');
     }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function maskEmail(string $email): string
     {
         if (!str_contains($email, '@')) return $email;
         [$local, $domain] = explode('@', $email, 2);
-        return substr($local, 0, min(2, strlen($local))) . str_repeat('*', max(0, strlen($local) - 2)) . '@' . $domain;
+        $visible = substr($local, 0, min(2, strlen($local)));
+        return $visible . str_repeat('*', max(0, strlen($local) - 2)) . '@' . $domain;
     }
 
     private function getUserRole(int $userId): string

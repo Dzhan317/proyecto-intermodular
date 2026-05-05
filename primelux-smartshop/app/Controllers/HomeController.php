@@ -10,6 +10,7 @@ class HomeController extends Controller
 {
     public function index(array $params): void
     {
+        // Placeholder hasta la Fase 4
         echo '<!DOCTYPE html>
 <html lang="es">
 <head>
