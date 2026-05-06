@@ -1,8 +1,7 @@
 <?php
 /*
  * Pantalla de recuperación de contraseña.
- * El usuario introduce su email y recibe un enlace si la cuenta existe.
- * El mensaje de confirmación es siempre el mismo: nunca revela si el email está registrado.
+ * Mensaje siempre idéntico: nunca revela si el email está registrado.
  */
 $pageTitle = '¿Olvidaste tu contraseña? — PrimeLux SmartShop';
 ob_start();
@@ -20,8 +19,11 @@ ob_start();
         <label for="email" class="block text-sm text-[#9CA3AF] mb-2">Correo electrónico</label>
         <div class="relative">
             <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <img src="<?= APP_URL ?>/assets/img/icons/sobre.svg"
-                     alt="" class="w-4 h-4" style="filter: invert(60%) sepia(0%) saturate(0%);">
+                <svg class="w-4 h-4 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7
+                             a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
             </span>
             <input type="email" id="email" name="email"
                    value="<?= htmlspecialchars($email ?? '') ?>"

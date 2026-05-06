@@ -44,8 +44,9 @@
 
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/app.css">
     <script src="<?= APP_URL ?>/assets/js/auth.js"></script>
+    <script src="<?= APP_URL ?>/assets/js/profile.js"></script>
 </head>
-<body class="bg-[#0F172A] min-h-screen flex flex-col items-center justify-center px-4">
+<body class="bg-[#0F172A] text-white min-h-screen flex flex-col font-sora">
 
     <?php if (!empty($_SESSION['csrf_error'])): ?>
         <div class="fixed top-0 left-0 right-0 z-50 bg-[#F59E0B] text-[#0F172A]">
@@ -72,40 +73,13 @@
         <?php unset($_SESSION['csrf_error']); ?>
     <?php endif; ?>
 
-    <div class="w-full max-w-md">
+    <?php require_once APP_PATH . '/Views/layouts/partials/header.php'; ?>
 
-        <div class="flex justify-center mb-8">
-            <a href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logos/logo_principal.png"
-                     alt="PrimeLux SmartShop" class="h-16 w-auto">
-            </a>
-        </div>
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <?= $content ?>
+    </main>
 
-        <div class="bg-[#1F2937] rounded-2xl p-8 border border-[#374151]">
-
-            <?php if (!empty($error)): ?>
-                <div class="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                    <?= htmlspecialchars($error) ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($success)): ?>
-                <div class="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
-                    <?= htmlspecialchars($success) ?>
-                </div>
-            <?php endif; ?>
-
-            <?= $content ?>
-        </div>
-
-        <p class="text-center text-[#6B7280] text-xs mt-6">
-            Al continuar, aceptas nuestros
-            <a href="<?= APP_URL ?>/terms"   class="text-[#60A5FA] hover:text-[#93C5FD]">Términos de uso</a>
-            y la
-            <a href="<?= APP_URL ?>/privacy" class="text-[#60A5FA] hover:text-[#93C5FD]">Política de privacidad</a>.
-        </p>
-
-    </div>
+    <?php require_once APP_PATH . '/Views/layouts/partials/footer.php'; ?>
 
 </body>
 </html>
