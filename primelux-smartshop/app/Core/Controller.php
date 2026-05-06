@@ -8,20 +8,13 @@ declare(strict_types=1);
  */
 abstract class Controller
 {
-    /**
-     * Render a view file.
-     * Dot notation maps to subdirectory: 'auth.login' -> Views/auth/login.php
-     */
     protected function view(string $view, array $data = []): void
     {
         extract($data);
-
         $viewFile = APP_PATH . '/Views/' . str_replace('.', '/', $view) . '.php';
-
         if (!file_exists($viewFile)) {
             throw new \RuntimeException("View not found: {$view}");
         }
-
         require_once $viewFile;
     }
 
@@ -49,7 +42,6 @@ abstract class Controller
         return isset($_SESSION['user_id']);
     }
 
-    /** Redirect to login if not authenticated. */
     protected function requireAuth(): void
     {
         if (!$this->isLoggedIn()) {
@@ -57,7 +49,6 @@ abstract class Controller
         }
     }
 
-    /** Redirect to home if not admin. */
     protected function requireAdmin(): void
     {
         $this->requireAuth();
@@ -66,10 +57,6 @@ abstract class Controller
         }
     }
 
-    /**
-     * Generate and store a CSRF token in the session.
-     * Use in views: <input type="hidden" name="csrf_token" value="<?= $this->csrfToken() ?>">
-     */
     protected function csrfToken(): string
     {
         if (empty($_SESSION[CSRF_TOKEN_NAME])) {
@@ -78,13 +65,24 @@ abstract class Controller
         return $_SESSION[CSRF_TOKEN_NAME];
     }
 
-    /** Validate the CSRF token from a POST request. Exits on failure. */
+    /**
+     * Valida el token CSRF del formulario.
+     * Si la sesión expiró o el token no coincide, guarda un mensaje claro
+     * y redirige de vuelta al formulario en lugar de mostrar una pantalla vacía.
+     */
     protected function validateCsrf(): void
     {
-        $token = $_POST[CSRF_TOKEN_NAME] ?? '';
-        if (!hash_equals($_SESSION[CSRF_TOKEN_NAME] ?? '', $token)) {
-            http_response_code(403);
-            exit('Invalid CSRF token.');
+        $token         = $_POST[CSRF_TOKEN_NAME] ?? '';
+        $sessionToken  = $_SESSION[CSRF_TOKEN_NAME] ?? '';
+
+        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
+            // Regenera el token para que el formulario vuelva a funcionar
+            $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
+            $_SESSION['csrf_error']    = 'Tu sesión ha expirado. Por favor, inténtalo de nuevo.';
+
+            // Vuelve al formulario que hizo el POST
+            $referer = $_SERVER['HTTP_REFERER'] ?? (APP_URL . '/login');
+            $this->redirect($referer);
         }
     }
 }
