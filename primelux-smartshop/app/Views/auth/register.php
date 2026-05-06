@@ -101,18 +101,27 @@ ob_start();
         </div>
     </div>
 
-    <!-- Confirmar contraseña -->
+    <!-- Confirmar contraseña — con toggle igual que el campo anterior -->
     <div class="mb-5">
         <label for="password_confirm" class="block text-sm text-[#9CA3AF] mb-2">
             Confirmar contraseña *
         </label>
-        <input type="password" id="password_confirm" name="password_confirm"
-               placeholder="Repite tu contraseña"
-               autocomplete="new-password" required
-               class="w-full bg-[#111827] text-white placeholder-[#6B7280] border border-[#374151]
-                      rounded-xl px-4 py-3 text-sm
-                      focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]
-                      transition-colors">
+        <div class="relative">
+            <input type="password" id="password_confirm" name="password_confirm"
+                   placeholder="Repite tu contraseña"
+                   autocomplete="new-password" required
+                   class="w-full bg-[#111827] text-white placeholder-[#6B7280] border border-[#374151]
+                          rounded-xl pl-4 pr-11 py-3 text-sm
+                          focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]
+                          transition-colors">
+            <button type="button" id="toggleConfirm"
+                    class="absolute inset-y-0 right-3 flex items-center px-1">
+                <img id="eyeConfirm"
+                     src="<?= APP_URL ?>/assets/img/icons/ojo.svg"
+                     alt="Mostrar contraseña"
+                     class="w-5 h-5 icon">
+            </button>
+        </div>
         <p id="matchError" class="text-xs text-red-400 mt-1 hidden">
             Las contraseñas no coinciden.
         </p>
@@ -149,7 +158,8 @@ ob_start();
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    initPasswordToggle('password', 'togglePassword', 'eyeIcon');
+    initPasswordToggle('password',         'togglePassword', 'eyeIcon');
+    initPasswordToggle('password_confirm', 'toggleConfirm',  'eyeConfirm');
     initPasswordStrength('password');
     initPasswordMatch('password', 'password_confirm', 'matchError');
 });
