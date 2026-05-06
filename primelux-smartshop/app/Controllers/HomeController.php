@@ -10,21 +10,23 @@ class HomeController extends Controller
 {
     public function index(array $params): void
     {
-        // Placeholder hasta la Fase 4
         echo '<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrimeLux SmartShop</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>PrimeLux SmartShop — Próximamente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: "Sora", sans-serif; }</style>
 </head>
 <body class="bg-[#0F172A] min-h-screen flex items-center justify-center">
-    <div class="text-center">
-        <img src="' . APP_URL . '/assets/img/logos/logo_principal.png"
-             alt="PrimeLux SmartShop" class="h-20 mx-auto mb-8">
+    <div class="text-center px-4">
+        <img src="' . APP_URL . '/assets/img/logos/logo_secundario.png"
+             alt="PrimeLux SmartShop"
+             class="h-20 mx-auto mb-8"
+             onerror="this.style.display=\'none\'">
         <h1 class="text-3xl font-bold text-white mb-3">Próximamente</h1>
         <p class="text-[#9CA3AF] mb-8">Estamos preparando algo increíble.</p>
         <a href="' . APP_URL . '/login"
