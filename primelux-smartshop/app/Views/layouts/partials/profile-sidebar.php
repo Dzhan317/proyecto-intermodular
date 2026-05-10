@@ -4,6 +4,8 @@
  * $activeTab indica qué pestaña está activa: 'profile' | 'security'
  * MIS PEDIDOS y SOPORTE son placeholders para Fases 7 y 8.
  */
+$activeTab = (string) ($activeTab ?? 'profile');
+
 $tabs = [
     ['id' => 'profile',  'label' => 'Inicio',      'href' => APP_URL . '/profile',          'phase' => true],
     ['id' => 'orders',   'label' => 'Mis pedidos',  'href' => null,                          'phase' => false],
@@ -22,17 +24,17 @@ $tabs = [
                 <?php if ($isDisabled): ?>
                     <!-- Pestaña pendiente de implementar -->
                     <span class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                                 text-[#4B5563] cursor-not-allowed select-none">
+                                 text-[var(--color-text-disabled)] cursor-not-allowed select-none">
                         <?= htmlspecialchars($tab['label']) ?>
-                        <span class="ml-auto text-xs bg-[#1F2937] text-[#4B5563]
+                        <span class="ml-auto text-xs bg-[var(--color-bg-card)] text-[var(--color-text-disabled)]
                                      px-2 py-0.5 rounded-full">Próximamente</span>
                     </span>
                 <?php else: ?>
                     <a href="<?= $tab['href'] ?>"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors
                               <?= $isActive
-                                  ? 'bg-[#1F2937] text-white font-semibold border-l-2 border-[#2563EB]'
-                                  : 'text-[#9CA3AF] hover:text-white hover:bg-[#1F2937]' ?>">
+                                  ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] font-semibold border-l-2 border-[var(--color-brand)]'
+                                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]' ?>">
                         <?= htmlspecialchars($tab['label']) ?>
                     </a>
                 <?php endif; ?>

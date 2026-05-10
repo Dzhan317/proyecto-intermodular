@@ -11,12 +11,12 @@ $expiryMs    = $expiryMins * 60 * 1000;
 ob_start();
 ?>
 
-<h1 class="text-2xl font-bold text-white mb-2">Verificación en dos pasos</h1>
-<p class="text-[#9CA3AF] text-sm mb-1">Hemos enviado un código de 6 dígitos a</p>
-<p class="text-white text-sm font-semibold mb-5"><?= htmlspecialchars($maskedEmail) ?></p>
+<h1 class="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Verificación en dos pasos</h1>
+<p class="text-[var(--color-text-secondary)] text-sm mb-1">Hemos enviado un código de 6 dígitos a</p>
+<p class="text-[var(--color-text-primary)] text-sm font-semibold mb-5"><?= htmlspecialchars($maskedEmail) ?></p>
 
 <?php if (!empty($_SESSION['twofa_success'])): ?>
-    <div class="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
+    <div class="mb-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)]/30 rounded-lg text-[var(--color-success)] text-sm">
         <?= htmlspecialchars($_SESSION['twofa_success']) ?>
     </div>
     <?php unset($_SESSION['twofa_success']); ?>
@@ -24,9 +24,9 @@ ob_start();
 
 <!-- Temporizador de expiración -->
 <div class="flex items-center justify-center gap-2 mb-5">
-    <div class="w-2 h-2 rounded-full bg-[#10B981]" id="timerDot"></div>
-    <span class="text-[#9CA3AF] text-sm">
-        El código expira en <span id="countdown" class="font-semibold text-white"></span>
+    <div class="w-2 h-2 rounded-full bg-[var(--color-success)]" id="timerDot"></div>
+    <span class="text-[var(--color-text-secondary)] text-sm">
+        El código expira en <span id="countdown" class="font-semibold text-[var(--color-text-primary)]"></span>
     </span>
 </div>
 
@@ -41,16 +41,16 @@ ob_start();
                    maxlength="1"
                    data-index="<?= $i ?>"
                    autocomplete="<?= $i === 0 ? 'one-time-code' : 'off' ?>"
-                   class="w-12 h-14 bg-[#111827] text-white text-center text-2xl font-bold
-                          border-2 border-[#374151] rounded-xl
-                          focus:outline-none focus:border-[#2563EB]
+                   class="w-12 h-14 bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] text-center text-2xl font-bold
+                          border-2 border-[var(--color-border)] rounded-xl
+                          focus:outline-none focus:border-[var(--color-brand)]
                           transition-colors duration-150 caret-transparent">
         <?php endfor; ?>
     </div>
 
     <button type="submit" id="submitBtn" disabled
-            class="w-full bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF]
-                   text-white font-semibold py-3 rounded-xl text-sm
+            class="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] active:bg-[var(--color-brand-active)]
+                   text-[var(--color-text-primary)] font-semibold py-3 rounded-xl text-sm
                    transition-colors duration-200
                    disabled:opacity-40 disabled:cursor-not-allowed mb-4">
         Verificar
@@ -60,10 +60,10 @@ ob_start();
 <form method="POST" action="<?= APP_URL ?>/verify-2fa/resend">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
     <div class="text-center">
-        <p class="text-[#6B7280] text-sm mb-1">¿No recibiste el código?</p>
+        <p class="text-[var(--color-text-muted)] text-sm mb-1">¿No recibiste el código?</p>
         <button type="submit" id="resendBtn" disabled
-                class="text-[#60A5FA] hover:text-[#93C5FD] text-sm transition-colors
-                       disabled:text-[#4B5563] disabled:cursor-not-allowed">
+                class="text-[var(--color-link)] hover:text-[var(--color-link-hover)] text-sm transition-colors
+                       disabled:text-[var(--color-text-disabled)] disabled:cursor-not-allowed">
             Enviar de nuevo <span id="resendTimer"></span>
         </button>
     </div>
@@ -71,7 +71,7 @@ ob_start();
 
 <div class="text-center mt-4">
     <a href="<?= APP_URL ?>/login"
-       class="text-[#6B7280] hover:text-[#9CA3AF] text-xs transition-colors">
+       class="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] text-xs transition-colors">
         ← Volver al inicio de sesión
     </a>
 </div>
@@ -96,8 +96,9 @@ document.addEventListener('DOMContentLoaded', function () {
         countdown.textContent = mins + ':' + String(secs).padStart(2, '0');
 
         if (remaining <= 60000) {
-            countdown.style.color = '#EF4444';
-            if (dot) dot.style.background = '#EF4444';
+            var errorColor = getComputedStyle(document.documentElement).getPropertyValue('--color-error').trim();
+            countdown.style.color = errorColor;
+            if (dot) dot.style.background = errorColor;
         }
 
         if (remaining === 0) {
