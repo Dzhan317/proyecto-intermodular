@@ -51,7 +51,7 @@ try {
         } else {
             echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
                   <title>Error — PrimeLux SmartShop</title></head>
-                  <body style="background:#0F172A;color:#fff;font-family:sans-serif;
+                  <body style="background:#0D1B2A;color:#fff;font-family:sans-serif;
                                display:flex;align-items:center;justify-content:center;
                                min-height:100vh;margin:0;">
                   <div style="text-align:center;">
