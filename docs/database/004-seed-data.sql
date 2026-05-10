@@ -132,9 +132,18 @@ SELECT id, 'Unidad', 0.00, FLOOR(10 + RAND() * 40) FROM products WHERE status = 
 
 -- ── Rutas de imagen
 INSERT INTO product_images (product_id, image_url, is_main)
-SELECT id,
-    CONCAT('/assets/img/products/', slug, '.webp'),
+SELECT
+    p.id,
+    CONCAT('/assets/img/products/', c.slug, '/', p.slug, '.webp') AS image_url,
     1
-FROM products WHERE status = 'active';
+FROM products p
+INNER JOIN categories c ON c.id = p.category_id
+WHERE p.status = 'active'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM product_images pi
+      WHERE pi.product_id = p.id
+        AND pi.is_main = 1
+  );
 
 SET FOREIGN_KEY_CHECKS = 1;
