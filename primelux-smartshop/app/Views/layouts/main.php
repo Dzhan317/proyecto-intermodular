@@ -25,16 +25,16 @@
                 extend: {
                     fontFamily: { sora: ['Sora', 'sans-serif'] },
                     colors: {
-                        brand:   { DEFAULT: '#2563EB', hover: '#1D4ED8', active: '#1E40AF' },
-                        accent:  { DEFAULT: '#F59E0B', hover: '#D97706' },
+                        brand:   { DEFAULT: 'var(--color-brand)', hover: 'var(--color-brand-hover)', active: 'var(--color-brand-active)' },
+                        accent:  { DEFAULT: 'var(--color-accent)', hover: 'var(--color-accent-hover)' },
                         surface: {
-                            main:      '#0F172A',
-                            secondary: '#111827',
-                            card:      '#1F2937',
-                            hover:     '#374151',
+                            main:      'var(--color-bg-main)',
+                            secondary: 'var(--color-bg-secondary)',
+                            card:      'var(--color-bg-card)',
+                            hover:     'var(--color-bg-hover)',
                         },
-                        'req-ok':      '#10B981',
-                        'req-pending': '#6B7280',
+                        'req-ok':      'var(--color-success)',
+                        'req-pending': 'var(--color-text-muted)',
                     },
                 }
             },
@@ -43,28 +43,28 @@
     </script>
 
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/app.css">
+    <script src="<?= APP_URL ?>/assets/js/app.js"></script>
     <script src="<?= APP_URL ?>/assets/js/auth.js"></script>
     <script src="<?= APP_URL ?>/assets/js/profile.js"></script>
+    <script src="<?= APP_URL ?>/assets/js/shop.js"></script>
 </head>
-<body class="bg-[#0F172A] text-white min-h-screen flex flex-col font-sora">
+<body class="bg-[var(--color-bg-main)] text-[var(--color-text-primary)] min-h-screen flex flex-col font-sora">
 
     <?php if (!empty($_SESSION['csrf_error'])): ?>
-        <div class="fixed top-0 left-0 right-0 z-50 bg-[#F59E0B] text-[#0F172A]">
+        <div class="fixed top-0 left-0 right-0 z-50 bg-[var(--color-warning)] text-[var(--color-bg-main)]">
             <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2
-                                 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                     </svg>
                     <p class="text-sm font-medium"><?= htmlspecialchars($_SESSION['csrf_error']) ?></p>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()"
-                        class="flex-shrink-0 text-[#0F172A] hover:opacity-70 transition-opacity"
+                        class="flex-shrink-0 text-[var(--color-bg-main)] hover:opacity-70 transition-opacity"
                         aria-label="Cerrar aviso">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
@@ -75,11 +75,10 @@
 
     <?php require_once APP_PATH . '/Views/layouts/partials/header.php'; ?>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="relative z-0 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <?= $content ?>
     </main>
 
     <?php require_once APP_PATH . '/Views/layouts/partials/footer.php'; ?>
-
 </body>
 </html>
