@@ -25,7 +25,7 @@ class ProfileController extends Controller
         $user = $this->userModel->findById((int) $_SESSION['user_id']);
 
         $this->view('profile.index', [
-            'pageTitle'  => 'Mi perfil — PrimeLux SmartShop',
+            'pageTitle'  => 'Mi perfil | PrimeLux SmartShop',
             'user'       => $user,
             'activeTab'  => 'profile',
             'csrfToken'  => $this->csrfToken(),
@@ -73,7 +73,7 @@ class ProfileController extends Controller
         $user = $this->userModel->findById((int) $_SESSION['user_id']);
 
         $this->view('profile.security', [
-            'pageTitle'  => 'Seguridad — PrimeLux SmartShop',
+            'pageTitle'  => 'Seguridad | PrimeLux SmartShop',
             'user'       => $user,
             'activeTab'  => 'security',
             'csrfToken'  => $this->csrfToken(),

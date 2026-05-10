@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 // Públicas
 $router->get('/',               'HomeController@index');
+$router->get('/sobre-nosotros', 'HomeController@about');
 $router->get('/products',       'ProductController@index');
 $router->get('/products/:slug', 'ProductController@show');
 $router->get('/category/:slug', 'CategoryController@show');

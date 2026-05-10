@@ -29,6 +29,7 @@ class AuthController extends Controller
         $success = isset($_GET['reset']) ? 'Contraseña actualizada correctamente. Inicia sesión.' : '';
 
         $this->view('auth.step-email', [
+            'pageTitle' => 'Iniciar sesión | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'email'     => $_SESSION['auth_email'] ?? '',
             'success'   => $success,
@@ -43,6 +44,7 @@ class AuthController extends Controller
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->view('auth.step-email', [
+                'pageTitle' => 'Iniciar sesión | PrimeLux SmartShop',
                 'csrfToken' => $this->csrfToken(),
                 'error'     => 'Introduce un correo electrónico válido.',
                 'email'     => $email,
@@ -66,6 +68,7 @@ class AuthController extends Controller
         if (empty($_SESSION['auth_email'])) $this->redirect(APP_URL . '/login');
 
         $this->view('auth.login', [
+            'pageTitle' => 'Introduce tu contraseña | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'email'     => $_SESSION['auth_email'],
         ]);
@@ -83,6 +86,7 @@ class AuthController extends Controller
 
         if (!$result['success']) {
             $this->view('auth.login', [
+                'pageTitle' => 'Introduce tu contraseña | PrimeLux SmartShop',
                 'csrfToken' => $this->csrfToken(),
                 'email'     => $email,
                 'error'     => $result['error'],
@@ -117,6 +121,7 @@ class AuthController extends Controller
         }
 
         $this->view('auth.verify-2fa', [
+            'pageTitle' => 'Verificación en dos pasos | PrimeLux SmartShop',
             'csrfToken'   => $this->csrfToken(),
             'maskedEmail' => $this->maskEmail($_SESSION['pre_auth_user_email'] ?? ''),
             'error'       => $_SESSION['twofa_error'] ?? '',
@@ -181,6 +186,7 @@ class AuthController extends Controller
         if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
 
         $this->view('auth.register', [
+            'pageTitle' => 'Crear cuenta | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'email'     => $_SESSION['auth_email'] ?? '',
         ]);
@@ -203,6 +209,7 @@ class AuthController extends Controller
 
         if (!$result['success']) {
             $this->view('auth.register', [
+                'pageTitle' => 'Crear cuenta | PrimeLux SmartShop',
                 'csrfToken' => $this->csrfToken(),
                 'email'     => $data['email'],
                 'name'      => $data['name'],
@@ -239,6 +246,7 @@ class AuthController extends Controller
     public function forgotPasswordForm(array $params): void
     {
         $this->view('auth.forgot-password', [
+            'pageTitle' => 'Recuperar contraseña | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
         ]);
     }
@@ -251,6 +259,7 @@ class AuthController extends Controller
         $this->authService->sendPasswordReset($email);
 
         $this->view('auth.forgot-password', [
+            'pageTitle' => 'Recuperar contraseña | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'success'   => 'Si el correo está registrado, recibirás un enlace en breve.',
             'email'     => '',
@@ -260,6 +269,7 @@ class AuthController extends Controller
     public function resetPasswordForm(array $params): void
     {
         $this->view('auth.reset-password', [
+            'pageTitle' => 'Restablecer contraseña | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'token'     => $params['token'] ?? '',
         ]);
@@ -278,6 +288,7 @@ class AuthController extends Controller
 
         if (!$result['success']) {
             $this->view('auth.reset-password', [
+                'pageTitle' => 'Restablecer contraseña | PrimeLux SmartShop',
                 'csrfToken' => $this->csrfToken(),
                 'token'     => $token,
                 'error'     => $result['error'],

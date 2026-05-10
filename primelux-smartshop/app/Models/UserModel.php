@@ -48,8 +48,18 @@ class UserModel
 
     public function updatePassword(int $userId, string $hashedPassword): bool
     {
-        $stmt = $this->db->prepare('UPDATE users SET password = ? WHERE id = ?');
+        $stmt = $this->db->prepare('
+            UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?
+        ');
         return $stmt->execute([$hashedPassword, $userId]);
+    }
+
+    public function updateProfile(int $userId, string $name, string $lastName): bool
+    {
+        $stmt = $this->db->prepare('
+            UPDATE users SET name = ?, last_name = ?, updated_at = NOW() WHERE id = ?
+        ');
+        return $stmt->execute([$name, $lastName, $userId]);
     }
 
     public function emailExists(string $email): bool

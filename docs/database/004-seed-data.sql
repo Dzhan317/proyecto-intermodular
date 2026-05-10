@@ -145,3 +145,5 @@ WHERE p.status = 'active'
       WHERE pi.product_id = p.id
         AND pi.is_main = 1
   );
+
+SET FOREIGN_KEY_CHECKS = 1;
