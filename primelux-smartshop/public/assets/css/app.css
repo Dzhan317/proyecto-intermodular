@@ -7,32 +7,54 @@
 
 /* ─── Variables del sistema de diseño ─────────────────────────────────────── */
 :root {
+    /* Marca */
     --color-brand:          #2563EB;
     --color-brand-hover:    #1D4ED8;
     --color-brand-active:   #1E40AF;
-    --color-accent:         #F59E0B;
-    --color-accent-hover:   #D97706;
-    --color-bg-main:        #0F172A;
-    --color-bg-secondary:   #111827;
-    --color-bg-card:        #1F2937;
-    --color-bg-hover:       #374151;
+
+    /* Acento (dorado) */
+    --color-accent:         #EAB308;
+    --color-accent-hover:   #CA8A04;
+
+    /* Fondos */
+    --color-bg-main:        #0D1B2A;
+    --color-bg-secondary:   #111C2E;
+    --color-bg-card:        #1A2535;
+    --color-bg-hover:       #2D3F55;
+
+    /* Texto */
     --color-text-primary:   #FFFFFF;
     --color-text-secondary: #9CA3AF;
     --color-text-muted:     #6B7280;
+    --color-text-disabled:  #4B5563;
+
+    /* Bordes */
     --color-border:         #374151;
     --color-divider:        #1F2937;
+
+    /* Semánticos */
     --color-success:        #10B981;
+    --color-success-bg:     rgba(16, 185, 129, 0.10);
+    --color-success-border: rgba(16, 185, 129, 0.30);
+
     --color-error:          #EF4444;
-    --color-warning:        #F59E0B;
+    --color-error-bg:       rgba(239, 68, 68, 0.10);
+    --color-error-border:   rgba(239, 68, 68, 0.30);
+
+    --color-warning:        #EAB308;
     --color-info:           #3B82F6;
+
+    /* Links */
     --color-link:           #60A5FA;
     --color-link-hover:     #93C5FD;
+
+    /* Tipografía */
     --font-base:            'Sora', sans-serif;
     --font-size-body:       15px;
     --line-height-body:     1.6;
 }
 
-/* ─── Base ─────────────────────────────────────────────────────────────────── */
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
@@ -49,7 +71,7 @@ h1 { font-size: clamp(28px, 4vw, 40px);   font-weight: 700; line-height: 1.2; }
 h2 { font-size: clamp(22px, 3vw, 28px);   font-weight: 600; line-height: 1.3; }
 h3 { font-size: clamp(18px, 2.5vw, 22px); font-weight: 500; line-height: 1.4; }
 
-/* ─── Autofill ─────────────────────────────────────────────────────────────── */
+/* ─── Autofill ──────────────────────────────────────────────────────────────── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
@@ -62,18 +84,48 @@ input:-webkit-autofill:focus {
 .icon { fill: var(--color-text-secondary); transition: fill 0.15s ease; }
 button:hover .icon, button:focus .icon { fill: var(--color-text-primary); }
 
-/* ─── Scrollbar (webkit) ────────────────────────────────────────────────────── */
+/* ─── Scrollbar global (webkit) ─────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* ─── Slider doble de precio ────────────────────────────────────────────────── */
+/* ─── Scrollbar fina para listas compactas ───────────────────────────────────── */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar       { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
 
-/*
- * Los dos <input type="range"> se superponen con position:absolute.
- * Se resetea el aspecto nativo y se dibuja solo el thumb con el estilo dark.
- */
+/* ─── Ocultar scrollbar horizontal ──────────────────────────────────────────── */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* ─── Componentes de autenticación ──────────────────────────────────────────── */
+
+/* Tarjeta contenedora de formularios auth */
+.auth-card {
+    background-color: var(--color-bg-card);
+    border:           1px solid var(--color-border);
+}
+
+/* Alerta de error (formularios auth y perfil) */
+.alert-error {
+    background-color: var(--color-error-bg);
+    border:           1px solid var(--color-error-border);
+    color:            var(--color-error);
+}
+
+/* Alerta de éxito (formularios auth y perfil) */
+.alert-success {
+    background-color: var(--color-success-bg);
+    border:           1px solid var(--color-success-border);
+    color:            var(--color-success);
+}
+
+/* ─── Slider doble de precio ────────────────────────────────────────────────── */
 .price-slider {
     -webkit-appearance: none;
     appearance:         none;
@@ -96,40 +148,130 @@ button:hover .icon, button:focus .icon { fill: var(--color-text-primary); }
     box-shadow:         0 1px 4px rgba(0,0,0,0.4);
     transition:         background 0.15s ease, transform 0.15s ease;
 }
-.price-slider::-webkit-slider-thumb:hover {
-    background:   var(--color-brand-hover);
-    transform:    scale(1.15);
-}
-.price-slider:active::-webkit-slider-thumb {
-    transform: scale(1.2);
-}
+.price-slider::-webkit-slider-thumb:hover  { background: var(--color-brand-hover); transform: scale(1.15); }
+.price-slider:active::-webkit-slider-thumb { transform: scale(1.2); }
 
 /* Thumb — Firefox */
 .price-slider::-moz-range-thumb {
-    width:        18px;
-    height:       18px;
-    border-radius: 50%;
-    background:   var(--color-brand);
-    border:       2px solid #FFFFFF;
-    cursor:       pointer;
+    width:          18px;
+    height:         18px;
+    border-radius:  50%;
+    background:     var(--color-brand);
+    border:         2px solid #FFFFFF;
+    cursor:         pointer;
     pointer-events: all;
-    box-shadow:   0 1px 4px rgba(0,0,0,0.4);
-    transition:   background 0.15s ease, transform 0.15s ease;
+    box-shadow:     0 1px 4px rgba(0,0,0,0.4);
+    transition:     background 0.15s ease, transform 0.15s ease;
 }
-.price-slider::-moz-range-thumb:hover {
-    background: var(--color-brand-hover);
-    transform:  scale(1.15);
+.price-slider::-moz-range-thumb:hover { background: var(--color-brand-hover); transform: scale(1.15); }
+.price-slider::-moz-range-track       { background: transparent; height: 6px; }
+
+/* ─── Tarjetas de categorías home ─────────────────────────────────────────── */
+.category-card {
+  	display: block;
+    border: 1px solid transparent;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-/* Track — Firefox (oculto porque usamos el div custom) */
-.price-slider::-moz-range-track {
-    background: transparent;
-    height:     6px;
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }
 
-/* ─── Ocultar scrollbar horizontal en nav de categorías ─────────────────────── */
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width:    none;
+.category-card-title {
+    color: var(--color-text-primary);
+    transition: color 0.2s ease;
 }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+.category-card-description {
+    color: var(--color-text-secondary);
+}
+
+.category-card-icon {
+    border: 1px solid transparent;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.category-card:hover .category-card-icon {
+    transform: translateX(1px);
+}
+
+/* GOLD */
+.category-card--gold {
+    background-color: #243140;
+    border-color: #5C4D24;
+}
+
+.category-card--gold:hover {
+    background-color: #2A3748;
+}
+
+.category-card--gold .category-card-icon {
+    color: #EAB308;
+    background-color: rgba(234, 179, 8, 0.08);
+    border-color: rgba(92, 77, 36, 0.45);
+}
+
+.category-card--gold:hover .category-card-title {
+    color: #EAB308;
+}
+
+.category-card--gold:hover .category-card-icon {
+    border-color: #EAB308;
+}
+
+/* BLUE */
+.category-card--blue {
+    background-color: #1F2D40;
+    border-color: #3F5E85;
+}
+
+.category-card--blue:hover {
+    background-color: #26364C;
+}
+
+.category-card--blue .category-card-icon {
+    color: #60A5FA;
+    background-color: rgba(96, 165, 250, 0.10);
+    border-color: rgba(63, 94, 133, 0.45);
+}
+
+.category-card--blue:hover .category-card-title {
+    color: #60A5FA;
+}
+
+.category-card--blue:hover .category-card-icon {
+    border-color: #60A5FA;
+}
+
+/* HYBRID */
+.category-card--hybrid {
+    background-color: #223245;
+    border-color: #556D86;
+}
+
+.category-card--hybrid:hover {
+    background-color: #29394C;
+}
+
+.category-card--hybrid .category-card-icon {
+    color: #CFAE4B;
+    background-color: rgba(207, 174, 75, 0.08);
+    border-color: rgba(85, 109, 134, 0.45);
+}
+
+.category-card--hybrid:hover .category-card-title {
+    color: #CFAE4B;
+}
+
+.category-card--hybrid:hover .category-card-icon {
+    border-color: #CFAE4B;
+}

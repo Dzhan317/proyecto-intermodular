@@ -1,16 +1,17 @@
 <?php
 /*
  * Detalle de producto.
- * Imagen, precio, stock, botón añadir al carrito (Fase 5 placeholder)
+ * Imagen, precio, stock, botón añadir al carrito (activo en Fase 5)
  * y productos relacionados.
  */
 ob_start();
 
-$price      = number_format((float) $product['base_price'], 2, ',', '.') . ' €';
-$stock      = (int) ($variant['stock'] ?? 0);
-$hasStock   = $stock > 0;
-$imageUrl   = $product['image_url'] ?? null;
-$hasImage   = $imageUrl && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') . $imageUrl);
+$price    = number_format((float) $product['base_price'], 2, ',', '.') . ' €';
+$stock    = (int) ($variant['stock'] ?? 0);
+$hasStock = $stock > 0;
+$imageUrl = $product['image_url'] ?? null;
+$docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+$hasImage = $imageUrl && file_exists($docRoot . $imageUrl);
 ?>
 
 <!-- Breadcrumb -->
@@ -85,18 +86,18 @@ $hasImage   = $imageUrl && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/
             </p>
         <?php endif; ?>
 
-        <!-- Acciones — carrito en Fase 5 -->
+        <!-- Acciones -->
         <?php if ($hasStock): ?>
             <div class="space-y-3">
-                <!-- Selector de cantidad — JS en shop.js -->
+                <!-- Selector de cantidad -->
                 <div class="flex items-center gap-3">
                     <label class="text-sm text-[var(--color-text-secondary)]">Cantidad:</label>
                     <div class="flex items-center gap-2 bg-[var(--color-bg-card)] border border-[var(--color-border)]
                                 rounded-xl overflow-hidden">
                         <button type="button" id="qtyMinus"
                                 class="w-10 h-10 flex items-center justify-center
-                                       text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]
-                                       transition-colors text-lg font-bold">
+                                       text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]
+                                       hover:bg-[var(--color-bg-hover)] transition-colors text-lg font-bold">
                             −
                         </button>
                         <span id="qtyValue"
@@ -105,27 +106,28 @@ $hasImage   = $imageUrl && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/
                         </span>
                         <button type="button" id="qtyPlus"
                                 class="w-10 h-10 flex items-center justify-center
-                                       text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]
-                                       transition-colors text-lg font-bold">
+                                       text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]
+                                       hover:bg-[var(--color-bg-hover)] transition-colors text-lg font-bold">
                             +
                         </button>
                     </div>
                 </div>
 
-                <!-- Botón añadir al carrito — placeholder Fase 5 -->
-                <button type="button"
-                        data-product-id="<?= (int) $product['id'] ?>"
-                        data-variant-id="<?= (int) ($variant['id'] ?? 0) ?>"
-                        disabled
-                        title="Disponible en la próxima actualización"
-                        class="w-full bg-[var(--color-brand)] text-[var(--color-text-primary)] font-semibold py-3
-                               rounded-xl text-sm opacity-60 cursor-not-allowed">
-                    Añadir al carrito
-                </button>
+                <!-- Formulario añadir al carrito -->
+                <form id="addToCartForm" method="POST" action="<?= APP_URL ?>/cart/add">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                    <input type="hidden" name="product_id" value="<?= (int) $product['id'] ?>">
+                    <input type="hidden" name="variant_id" value="<?= (int) ($variant['id'] ?? 0) ?>">
+                    <input type="hidden" name="slug"       value="<?= htmlspecialchars($product['slug']) ?>">
+                    <input type="hidden" name="quantity"   id="cartQuantity" value="1">
 
-                <p class="text-[var(--color-text-disabled)] text-xs text-center">
-                    La funcionalidad de compra estará disponible próximamente.
-                </p>
+                    <button type="submit"
+                            class="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)]
+                                   text-white font-semibold py-3 rounded-xl text-sm
+                                   transition-colors duration-200">
+                        Añadir al carrito
+                    </button>
+                </form>
             </div>
         <?php else: ?>
             <button disabled
@@ -153,6 +155,16 @@ $hasImage   = $imageUrl && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     initQuantitySelector('qtyMinus', 'qtyPlus', 'qtyValue', <?= $stock ?>);
+
+    // Sincroniza el selector de cantidad con el campo oculto del formulario
+    var qtyValue   = document.getElementById('qtyValue');
+    var cartQtyInput = document.getElementById('cartQuantity');
+    if (qtyValue && cartQtyInput) {
+        var observer = new MutationObserver(function () {
+            cartQtyInput.value = qtyValue.textContent.trim();
+        });
+        observer.observe(qtyValue, { childList: true });
+    }
 });
 </script>
 
