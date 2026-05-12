@@ -77,8 +77,7 @@
 
         <div class="flex justify-center mb-8">
             <a href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logos/logo_principal.svg"
-                     onerror="this.onerror=null;this.src='<?= APP_URL ?>/assets/img/logos/logo_secundario.svg'"
+                <img src="<?= APP_URL ?>/assets/img/logos/logo_principal_auth.webp"
                      alt="PrimeLux SmartShop" class="h-56 w-auto">
             </a>
         </div>

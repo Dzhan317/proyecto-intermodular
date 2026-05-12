@@ -1,7 +1,7 @@
 <?php
 /*
  * Home — portada pública.
- * Muestra categorías principales y productos destacados de Fase 4.
+ * Muestra categorías principales y productos destacados.
  */
 ob_start();
 
@@ -11,10 +11,19 @@ $featuredProducts = is_array($featuredProducts ?? null) ? $featuredProducts : []
 $categoryDescriptions = [
     'componentes' => 'Procesadores, memorias, placas base y más hardware.',
     'electronica' => 'Dispositivos y accesorios para tu día a día digital.',
-    'informática' => 'Equipos y soluciones para trabajo, estudio y gaming.',
-    'periféricos' => 'Teclados, ratones, monitores y accesorios esenciales.',
+    'informatica' => 'Equipos y soluciones para trabajo, estudio y gaming.',
+    'perifericos' => 'Teclados, ratones, monitores y accesorios esenciales.',
     'redes' => 'Routers, switches y conectividad para casa o empresa.',
     'software' => 'Licencias y herramientas para productividad y seguridad.',
+];
+
+$categoryVariants = [
+    'componentes' => 'gold',
+    'perifericos' => 'gold',
+    'informatica' => 'blue',
+    'software' => 'blue',
+    'electronica' => 'hybrid',
+    'redes' => 'hybrid',
 ];
 ?>
 
@@ -51,7 +60,9 @@ $categoryDescriptions = [
             <div class="mb-6 flex items-end justify-between gap-4">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-link)]">Navegación</p>
-                    <h2 id="home-categories" class="mt-2 text-2xl font-bold text-[var(--color-text-primary)]">Categorías principales</h2>
+                    <h2 id="home-categories" class="mt-2 text-2xl font-bold text-[var(--color-text-primary)]">
+                        Categorías principales
+                    </h2>
                 </div>
                 <p class="text-sm text-[var(--color-text-muted)]"><?= count($categories) ?> categorías activas</p>
             </div>
@@ -62,20 +73,23 @@ $categoryDescriptions = [
                     $slug = (string) ($category['slug'] ?? '');
                     $name = (string) ($category['name'] ?? 'Categoría');
                     $description = $categoryDescriptions[$slug] ?? 'Explora productos seleccionados dentro de esta categoría.';
+                    $variant = $categoryVariants[$slug] ?? 'blue';
                     ?>
                     <a href="<?= APP_URL ?>/category/<?= htmlspecialchars($slug) ?>"
-                       class="group rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-5 transition-all duration-200 hover:border-[var(--color-brand)] hover:bg-[var(--color-bg-hover)]">
+                       class="category-card category-card--<?= htmlspecialchars($variant) ?> group block rounded-2xl p-5">
                         <div class="flex items-center justify-between gap-3">
-                            <h3 class="text-lg font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-link)] transition-colors">
+                            <h3 class="category-card-title text-lg font-semibold">
                                 <?= htmlspecialchars($name) ?>
                             </h3>
-                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-bg-secondary)] text-[var(--color-link)] border border-[var(--color-border)]">
+
+                            <span class="category-card-icon inline-flex h-10 w-10 items-center justify-center rounded-xl">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             </span>
                         </div>
-                        <p class="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
+
+                        <p class="category-card-description mt-3 text-sm leading-6">
                             <?= htmlspecialchars($description) ?>
                         </p>
                     </a>
@@ -88,7 +102,9 @@ $categoryDescriptions = [
         <div class="mb-6 flex items-end justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-link)]">Selección</p>
-                <h2 id="featured-products-title" class="mt-2 text-2xl font-bold text-[var(--color-text-primary)]">Productos destacados</h2>
+                <h2 id="featured-products-title" class="mt-2 text-2xl font-bold text-[var(--color-text-primary)]">
+                    Productos destacados
+                </h2>
             </div>
             <p class="text-sm text-[var(--color-text-muted)]"><?= count($featuredProducts) ?> resultados</p>
         </div>

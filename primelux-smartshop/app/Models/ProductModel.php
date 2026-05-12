@@ -4,6 +4,7 @@ declare(strict_types=1);
 /*
  * Consultas sobre la tabla products y sus relaciones.
  * Fase 4: filtros de precio (rango), stock, marca y orden.
+ * Buscador: search() y countSearch() buscan en name, description y brand.
  */
 
 class ProductModel
@@ -32,8 +33,56 @@ class ProductModel
     }
 
     /**
+     * Búsqueda de productos por término.
+     * Busca en name, description y brand con LIKE.
+     * Devuelve paginado igual que getByCategory.
+     */
+    public function search(
+        string $query,
+        int    $page    = 1,
+        int    $perPage = 12
+    ): array {
+        $term   = '%' . $query . '%';
+        $offset = ($page - 1) * $perPage;
+
+        $stmt = $this->db->prepare('
+            SELECT p.*, pi.image_url, COALESCE(v.stock, 0) AS stock,
+                   c.name AS category_name, c.slug AS category_slug
+            FROM products p
+            LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
+            LEFT JOIN variants v        ON v.product_id  = p.id
+            LEFT JOIN product_categories pc ON pc.product_id = p.id
+            LEFT JOIN categories c      ON c.id = pc.category_id
+            WHERE p.status = "active"
+              AND (p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)
+            ORDER BY
+                CASE WHEN p.name LIKE ? THEN 0 ELSE 1 END,
+                p.name ASC
+            LIMIT ? OFFSET ?
+        ');
+        $stmt->execute([$term, $term, $term, $term, $perPage, $offset]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Cuenta total de resultados para la paginación del buscador.
+     */
+    public function countSearch(string $query): int
+    {
+        $term = '%' . $query . '%';
+
+        $stmt = $this->db->prepare('
+            SELECT COUNT(DISTINCT p.id)
+            FROM products p
+            WHERE p.status = "active"
+              AND (p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)
+        ');
+        $stmt->execute([$term, $term, $term]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Marcas disponibles en una categoría — para los checkboxes del filtro.
-     * Solo devuelve marcas que tengan al menos un producto activo.
      */
     public function getBrandsByCategory(int $categoryId): array
     {
