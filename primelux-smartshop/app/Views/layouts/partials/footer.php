@@ -7,7 +7,7 @@ $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/
 
             <!-- Marca -->
             <div>
-                <img src="<?= APP_URL ?>/assets/img/logos/logo_secundario.png"
+                <img src="<?= APP_URL ?>/assets/img/logos/logo_secundario.webp"
                      alt="PrimeLux SmartShop"
                      class="h-16 w-auto mb-4">
 
