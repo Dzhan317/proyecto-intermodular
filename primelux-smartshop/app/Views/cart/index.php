@@ -54,10 +54,12 @@ $itemCount    = $totals['item_count']    ?? 0;
 
                 <!-- Ítems -->
                 <?php foreach ($items as $key => $item):
-                    $docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-                    $imgUrl   = $item['image_url'] ?? null;
-                    $hasImage = $imgUrl && file_exists($docRoot . $imgUrl);
-                    $lineTotal = number_format($item['price'] * $item['quantity'], 2, ',', '.');
+                    $docRoot    = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+                    $imgUrl     = $item['image_url'] ?? null;
+                    $hasImage   = $imgUrl && file_exists($docRoot . $imgUrl);
+                    $lineTotal  = number_format($item['price'] * $item['quantity'], 2, ',', '.');
+                    $itemStock  = (int) ($item['stock'] ?? 999);
+                    $overStock  = $itemStock > 0 && $item['quantity'] > $itemStock;
                 ?>
                     <div class="flex gap-4 px-4 py-4 border-b border-[var(--color-border)] last:border-b-0
                                 hover:bg-[var(--color-bg-hover)]/30 transition-colors">
@@ -111,13 +113,40 @@ $itemCount    = $totals['item_count']    ?? 0;
                                 </form>
                             </div>
 
-                            <!-- Variante — mapea a variants.name -->
+                            <!-- Variante -->
                             <?php if (!empty($item['variant_name']) && $item['variant_name'] !== 'Unidad'): ?>
                                 <span class="inline-block text-xs text-[var(--color-text-muted)]
                                              bg-[var(--color-bg-secondary)] border border-[var(--color-border)]
                                              px-2 py-0.5 rounded-md mb-2">
                                     <?= htmlspecialchars($item['variant_name']) ?>
                                 </span>
+                            <?php endif; ?>
+
+                            <!-- Badge de stock — avisa si la cantidad supera el stock disponible -->
+                            <?php if ($overStock): ?>
+                                <div class="mb-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-error)]
+                                                 bg-[var(--color-error-bg)] px-2.5 py-1 text-xs font-semibold
+                                                 text-[var(--color-error)]">
+                                        Solo quedan <?= $itemStock ?> unidad<?= $itemStock !== 1 ? 'es' : '' ?> disponibles
+                                    </span>
+                                </div>
+                            <?php elseif ($itemStock === 1): ?>
+                                <div class="mb-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-error)]
+                                                 bg-[var(--color-error-bg)] px-2.5 py-1 text-xs font-semibold
+                                                 text-[var(--color-error)]">
+                                        ¡Última unidad!
+                                    </span>
+                                </div>
+                            <?php elseif ($itemStock <= 3): ?>
+                                <div class="mb-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-warning)]
+                                                 bg-[var(--color-bg-secondary)] px-2.5 py-1 text-xs font-semibold
+                                                 text-[var(--color-warning)]">
+                                        Quedan <?= $itemStock ?>
+                                    </span>
+                                </div>
                             <?php endif; ?>
 
                             <!-- Precio unitario -->
@@ -128,10 +157,9 @@ $itemCount    = $totals['item_count']    ?? 0;
                                 </span>
                             </p>
 
-                            <!-- Fila inferior: cantidad + subtotal línea -->
+                            <!-- Fila inferior: cantidad + subtotal -->
                             <div class="flex items-center justify-between gap-3">
 
-                                <!-- Selector de cantidad (formulario POST) -->
                                 <div class="flex items-center gap-1">
                                     <span class="text-xs text-[var(--color-text-muted)] mr-2">Cantidad</span>
                                     <form method="POST" action="<?= APP_URL ?>/cart/update"
@@ -156,7 +184,8 @@ $itemCount    = $totals['item_count']    ?? 0;
                                                     value="<?= $item['quantity'] + 1 ?>"
                                                     class="w-9 h-9 flex items-center justify-center text-lg font-bold
                                                            text-[var(--color-text-secondary)] transition-colors
-                                                           hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]">
+                                                           hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]
+                                                           <?= $itemStock > 0 && $item['quantity'] >= $itemStock ? 'opacity-30 pointer-events-none' : '' ?>">
                                                 +
                                             </button>
                                         </div>
@@ -246,10 +275,6 @@ $itemCount    = $totals['item_count']    ?? 0;
             <h2 class="text-lg font-bold text-[var(--color-text-primary)] mb-5 uppercase tracking-wider">
                 Productos relacionados
             </h2>
-            <!--
-                Scroll horizontal CSS — mismo efecto visual que un carrusel
-                sin JavaScript adicional. snap-x para un deslizamiento preciso.
-            -->
             <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-thin
                         snap-x snap-mandatory -mx-4 px-4">
                 <?php foreach ($related as $product): ?>
