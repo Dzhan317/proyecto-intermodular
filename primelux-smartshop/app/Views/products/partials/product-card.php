@@ -18,10 +18,27 @@ $hasImage   = $imageUrl && file_exists($docRoot . $imageUrl);
           flex flex-col hover:border-[var(--color-brand)] hover:shadow-lg hover:shadow-black/20
           transition-all duration-200">
 
-    <!-- Badge sin stock -->
+    <!-- Badge de stock -->
     <?php if (!$hasStock): ?>
-        <span class="absolute top-3 left-3 z-10 inline-flex items-center rounded-md border border-[var(--color-error-border,var(--color-error))] bg-[var(--color-error)] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--color-text-primary)] shadow-md shadow-black/25">
+        <span class="absolute top-3 left-3 z-10 inline-flex items-center rounded-md
+                     border border-[var(--color-error)] bg-[var(--color-error)]
+                     px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide
+                     text-white shadow-md shadow-black/25">
             Sin stock
+        </span>
+    <?php elseif ($stock === 1): ?>
+        <span class="absolute top-3 left-3 z-10 inline-flex items-center rounded-md
+                     border border-[var(--color-error)] bg-[var(--color-error-bg)]
+                     px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide
+                     text-[var(--color-error)] shadow-md shadow-black/25">
+            ¡Última unidad!
+        </span>
+    <?php elseif ($stock <= 3): ?>
+        <span class="absolute top-3 left-3 z-10 inline-flex items-center rounded-md
+                     border border-[var(--color-warning)] bg-[var(--color-bg-secondary)]
+                     px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide
+                     text-[var(--color-warning)] shadow-md shadow-black/25">
+            Quedan <?= $stock ?>
         </span>
     <?php endif; ?>
 
