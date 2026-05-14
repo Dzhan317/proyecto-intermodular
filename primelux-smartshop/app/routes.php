@@ -29,10 +29,11 @@ $router->get( '/reset-password/:token', 'AuthController@resetPasswordForm');
 $router->post('/reset-password/:token', 'AuthController@resetPassword');
 
 // Perfil de usuario
-$router->get( '/profile',          'ProfileController@index');
-$router->post('/profile',          'ProfileController@update');
-$router->get( '/profile/security', 'ProfileController@security');
-$router->post('/profile/password', 'ProfileController@changePassword');
+$router->get( '/profile',            'ProfileController@index');
+$router->post('/profile',            'ProfileController@update');
+$router->get( '/profile/addresses',  'ProfileController@addresses');
+$router->get( '/profile/security',   'ProfileController@security');
+$router->post('/profile/password',   'ProfileController@changePassword');
 
 // Pedidos (Fase 7)
 $router->get('/orders',      'OrderController@index');
@@ -48,6 +49,7 @@ $router->post('/cart/remove', 'CartController@remove');
 $router->get( '/checkout/shipping', 'CheckoutController@shipping');
 $router->post('/checkout/shipping', 'CheckoutController@saveShipping');
 $router->get( '/checkout/payment',  'CheckoutController@payment');
+$router->post('/checkout/payment',  'CheckoutController@initiatePayment');
 $router->get( '/checkout/success',  'CheckoutController@success');
 $router->get( '/checkout/cancel',   'CheckoutController@cancel');
 
@@ -58,29 +60,9 @@ $router->get( '/support/:id',         'SupportController@show');
 $router->post('/support/:id/message', 'SupportController@sendMessage');
 
 // Admin (Fase 9)
-$router->get( '/admin',                       'AdminController@dashboard');
-$router->get( '/admin/products',              'AdminProductController@index');
-$router->get( '/admin/products/create',       'AdminProductController@create');
-$router->post('/admin/products/create',       'AdminProductController@store');
-$router->get( '/admin/products/:id/edit',     'AdminProductController@edit');
-$router->post('/admin/products/:id/edit',     'AdminProductController@update');
-$router->post('/admin/products/:id/delete',   'AdminProductController@destroy');
-$router->get( '/admin/categories',            'AdminCategoryController@index');
-$router->get( '/admin/categories/create',     'AdminCategoryController@create');
-$router->post('/admin/categories/create',     'AdminCategoryController@store');
-$router->get( '/admin/categories/:id/edit',   'AdminCategoryController@edit');
-$router->post('/admin/categories/:id/edit',   'AdminCategoryController@update');
-$router->post('/admin/categories/:id/delete', 'AdminCategoryController@destroy');
-$router->get( '/admin/users',                 'AdminUserController@index');
-$router->get( '/admin/users/create',          'AdminUserController@create');
-$router->post('/admin/users/create',          'AdminUserController@store');
-$router->get( '/admin/users/:id/edit',        'AdminUserController@edit');
-$router->post('/admin/users/:id/edit',        'AdminUserController@update');
-$router->post('/admin/users/:id/delete',      'AdminUserController@destroy');
-$router->get( '/admin/orders',                'AdminOrderController@index');
-$router->get( '/admin/orders/:id',            'AdminOrderController@show');
-$router->post('/admin/orders/:id/status',     'AdminOrderController@updateStatus');
-$router->get( '/admin/support',               'AdminSupportController@index');
-$router->get( '/admin/support/:id',           'AdminSupportController@show');
-$router->post('/admin/support/:id/message',   'AdminSupportController@sendMessage');
-$router->post('/admin/support/:id/close',     'AdminSupportController@close');
+$router->get('/admin',                  'AdminController@dashboard');
+$router->get('/admin/products',         'AdminController@products');
+$router->get('/admin/orders',           'AdminController@orders');
+$router->post('/admin/orders/:id',      'AdminController@updateOrderStatus');
+$router->get('/admin/users',            'AdminController@users');
+$router->post('/admin/users/:id',       'AdminController@updateUserStatus');
