@@ -12,18 +12,16 @@ declare(strict_types=1);
  *     variant_id (string) => [
  *       'product_id'   => int,
  *       'variant_id'   => int,
- *       'variant_name' => string,   // variants.name → "Unidad", "16GB"...
- *       'name'         => string,   // snapshot del nombre al añadir
- *       'price'        => float,    // snapshot del precio (base_price + extra_price)
+ *       'variant_name' => string,
+ *       'name'         => string,
+ *       'price'        => float,
  *       'quantity'     => int,
  *       'image_url'    => string|null,
  *       'slug'         => string,
+ *       'stock'        => int,   // snapshot del stock al añadir — se refresca en update()
  *     ]
  *   ]
  * ]
- *
- * Interacciones: cada add() registra en interactions(type='cart')
- * para alimentar el motor de recomendaciones (Block 4 del schema).
  */
 
 require_once APP_PATH . '/Models/ProductModel.php';
@@ -84,15 +82,16 @@ class CartController extends Controller
 
         $this->initCart();
 
-        $key   = (string) $variantId;
-        $items = &$_SESSION['cart']['items'];
+        $key      = (string) $variantId;
+        $items    = &$_SESSION['cart']['items'];
+        $maxStock = (int) $variant['stock'];
 
-        // Precio real = base_price + extra_price de la variante
         $unitPrice = (float) $product['base_price'] + (float) ($variant['extra_price'] ?? 0);
 
         if (isset($items[$key])) {
             $newQty              = $items[$key]['quantity'] + $quantity;
-            $items[$key]['quantity'] = min($newQty, (int) $variant['stock']);
+            $items[$key]['quantity'] = min($newQty, $maxStock);
+            $items[$key]['stock']    = $maxStock; // refresca snapshot
         } else {
             $items[$key] = [
                 'product_id'   => (int) $product['id'],
@@ -100,13 +99,13 @@ class CartController extends Controller
                 'variant_name' => $variant['name'] ?? 'Unidad',
                 'name'         => $product['name'],
                 'price'        => $unitPrice,
-                'quantity'     => min($quantity, (int) $variant['stock']),
+                'quantity'     => min($quantity, $maxStock),
                 'image_url'    => $product['image_url'] ?? null,
                 'slug'         => $product['slug'],
+                'stock'        => $maxStock,
             ];
         }
 
-        // Registra interacción tipo 'cart' para el motor de recomendaciones
         $this->logCartInteraction((int) $product['id']);
 
         $_SESSION['cart_success'] = '¡Producto añadido al carrito!';
@@ -124,8 +123,23 @@ class CartController extends Controller
 
         $this->initCart();
 
-        if (isset($_SESSION['cart']['items'][$variantId])) {
-            $_SESSION['cart']['items'][$variantId]['quantity'] = $quantity;
+        if (!isset($_SESSION['cart']['items'][$variantId])) {
+            $this->redirect(APP_URL . '/cart');
+        }
+
+        $item = &$_SESSION['cart']['items'][$variantId];
+
+        // Refresca el stock real desde BD para evitar superar el disponible
+        $productModel = new ProductModel();
+        $variant      = $productModel->getDefaultVariant($item['product_id']);
+        $maxStock     = $variant ? (int) $variant['stock'] : ($item['stock'] ?? 1);
+
+        // Actualiza snapshot de stock y aplica límite
+        $item['stock']    = $maxStock;
+        $item['quantity'] = min($quantity, $maxStock);
+
+        if ($item['quantity'] < $quantity) {
+            $_SESSION['cart_error'] = 'Solo quedan ' . $maxStock . ' unidad' . ($maxStock !== 1 ? 'es' : '') . ' disponibles de este producto.';
         }
 
         $this->redirect(APP_URL . '/cart');
@@ -167,10 +181,6 @@ class CartController extends Controller
         return $_SESSION['cart']['items'] ?? [];
     }
 
-    /**
-     * Los precios en BD ya incluyen IVA.
-     * Se desglosa informativamente (21%) — coherente con orders.total.
-     */
     private function calculateTotals(array $items): array
     {
         $total     = 0.0;
@@ -194,11 +204,6 @@ class CartController extends Controller
         ];
     }
 
-    /**
-     * Registra interacción de carrito en interactions.
-     * Alimenta el motor de recomendaciones (Block 4 del schema).
-     * No interrumpe el flujo si falla.
-     */
     private function logCartInteraction(int $productId): void
     {
         try {
@@ -210,10 +215,6 @@ class CartController extends Controller
         }
     }
 
-    /**
-     * Productos relacionados de las categorías presentes en el carrito.
-     * Excluye los productos ya añadidos.
-     */
     private function getRelatedProducts(array $items): array
     {
         if (empty($items)) return [];
