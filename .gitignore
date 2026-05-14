@@ -2,6 +2,9 @@
 primelux-smartshop/config/config.php
 primelux-smartshop/config/config.local.php
 
+# Logs de producción
+primelux-smartshop/logs/*.log
+
 # OS y editor
 .DS_Store
 Thumbs.db
@@ -10,8 +13,10 @@ Thumbs.db
 *.swp
 
 # PHP
-*.log
 /vendor/
+
+# Vendor local (Stripe sin Composer)
+primelux-smartshop/public/vendor/
 
 # Node (si se usa en local para Tailwind)
 node_modules/
