@@ -28,11 +28,19 @@ class AuthController extends Controller
         // Mensaje de confirmación tras restablecer contraseña
         $success = isset($_GET['reset']) ? 'Contraseña actualizada correctamente. Inicia sesión.' : '';
 
+        // Mensaje de sesión expirada por inactividad
+        $expired = '';
+        if (!empty($_SESSION['session_expired'])) {
+            $expired = 'Tu sesión ha expirado por inactividad. Por favor, inicia sesión de nuevo.';
+            unset($_SESSION['session_expired']);
+        }
+
         $this->view('auth.step-email', [
             'pageTitle' => 'Iniciar sesión | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
             'email'     => $_SESSION['auth_email'] ?? '',
             'success'   => $success,
+            'expired'   => $expired,
         ]);
     }
 
@@ -121,7 +129,7 @@ class AuthController extends Controller
         }
 
         $this->view('auth.verify-2fa', [
-            'pageTitle' => 'Verificación en dos pasos | PrimeLux SmartShop',
+            'pageTitle'   => 'Verificación en dos pasos | PrimeLux SmartShop',
             'csrfToken'   => $this->csrfToken(),
             'maskedEmail' => $this->maskEmail($_SESSION['pre_auth_user_email'] ?? ''),
             'error'       => $_SESSION['twofa_error'] ?? '',
@@ -148,8 +156,14 @@ class AuthController extends Controller
             $this->redirect(APP_URL . '/verify-2fa');
         }
 
-        $_SESSION['user_id']   = $userId;
-        $_SESSION['user_role'] = $this->getUserRole($userId);
+        // Carga el usuario completo para guardar todos los datos en sesión
+        $user = (new UserModel())->findById($userId);
+
+        $_SESSION['user_id']        = $userId;
+        $_SESSION['user_role']      = $user['role']      ?? 'customer';
+        $_SESSION['user_name']      = $user['name']      ?? '';
+        $_SESSION['user_last_name'] = $user['last_name'] ?? '';
+        $_SESSION['last_activity']  = time();
 
         unset(
             $_SESSION['pre_auth_user_id'],
@@ -307,11 +321,5 @@ class AuthController extends Controller
         [$local, $domain] = explode('@', $email, 2);
         $visible = substr($local, 0, min(2, strlen($local)));
         return $visible . str_repeat('*', max(0, strlen($local) - 2)) . '@' . $domain;
-    }
-
-    private function getUserRole(int $userId): string
-    {
-        $user = (new UserModel())->findById($userId);
-        return $user['role'] ?? 'customer';
     }
 }
