@@ -27,11 +27,15 @@ function initPasswordToggle(inputId, buttonId, iconId) {
 
 /* ─── Indicador de fuerza de contraseña ───────────────────────────────────── */
 
+// Reglas NIST 2025 — longitud como factor principal, 1 de cada tipo.
+// Si cambias estos valores, actualiza también:
+//   - AuthService::validatePasswordStrength()         (backend)
+//   - app/Views/auth/partials/password-requirements.php (textos HTML)
 var PASSWORD_RULES = {
-    'req-length':  function (v) { return v.length >= 10; },
-    'req-upper':   function (v) { return (v.match(/[A-Z]/g) || []).length >= 2; },
-    'req-lower':   function (v) { return (v.match(/[a-z]/g) || []).length >= 2; },
-    'req-number':  function (v) { return (v.match(/[0-9]/g) || []).length >= 2; },
+    'req-length':  function (v) { return v.length >= 12; },
+    'req-upper':   function (v) { return (v.match(/[A-Z]/g) || []).length >= 1; },
+    'req-lower':   function (v) { return (v.match(/[a-z]/g) || []).length >= 1; },
+    'req-number':  function (v) { return (v.match(/[0-9]/g) || []).length >= 1; },
     'req-special': function (v) { return /[^A-Za-z0-9]/.test(v); },
 };
 

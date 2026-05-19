@@ -74,32 +74,8 @@ ob_start();
         </div>
     </div>
 
-    <!-- Indicador de fuerza -->
-    <div class="mb-4 p-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
-        <p class="text-xs text-[var(--color-text-muted)] mb-2">La contraseña debe cumplir:</p>
-        <div class="grid grid-cols-2 gap-1 text-xs">
-            <div id="req-length"  class="req-item flex items-center gap-1.5 text-req-pending">
-                <span class="req-dot w-1.5 h-1.5 rounded-full bg-req-pending flex-shrink-0"></span>
-                Mínimo 10 caracteres
-            </div>
-            <div id="req-upper"   class="req-item flex items-center gap-1.5 text-req-pending">
-                <span class="req-dot w-1.5 h-1.5 rounded-full bg-req-pending flex-shrink-0"></span>
-                2 mayúsculas
-            </div>
-            <div id="req-lower"   class="req-item flex items-center gap-1.5 text-req-pending">
-                <span class="req-dot w-1.5 h-1.5 rounded-full bg-req-pending flex-shrink-0"></span>
-                2 minúsculas
-            </div>
-            <div id="req-number"  class="req-item flex items-center gap-1.5 text-req-pending">
-                <span class="req-dot w-1.5 h-1.5 rounded-full bg-req-pending flex-shrink-0"></span>
-                2 números
-            </div>
-            <div id="req-special" class="req-item flex items-center gap-1.5 text-req-pending col-span-2">
-                <span class="req-dot w-1.5 h-1.5 rounded-full bg-req-pending flex-shrink-0"></span>
-                1 carácter especial (!@#$%...)
-            </div>
-        </div>
-    </div>
+    <!-- Indicador de fuerza — requisitos de contraseña -->
+    <?php require APP_PATH . '/Views/auth/partials/password-requirements.php'; ?>
 
     <!-- Confirmar contraseña — con toggle igual que el campo anterior -->
     <div class="mb-5">
