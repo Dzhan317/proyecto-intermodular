@@ -15,14 +15,21 @@ function initQuantitySelector(minusBtnId, plusBtnId, valueId, maxStock) {
     if (!minusBtn || !plusBtn || !valueEl) return;
 
     var qty = 1;
-    var max = maxStock || 99;
+    var max = (maxStock && maxStock > 0) ? maxStock : 99;
+
+    function setDisabled(btn, disabled) {
+        btn.disabled = disabled;
+        if (disabled) {
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        } else {
+            btn.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+    }
 
     function render() {
         valueEl.textContent = qty;
-        minusBtn.disabled   = qty <= 1;
-        plusBtn.disabled    = qty >= max;
-        minusBtn.classList.toggle('opacity-40', qty <= 1);
-        plusBtn.classList.toggle('opacity-40',  qty >= max);
+        setDisabled(minusBtn, qty <= 1);
+        setDisabled(plusBtn,  qty >= max);
     }
 
     minusBtn.addEventListener('click', function () { if (qty > 1)   { qty--; render(); } });

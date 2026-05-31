@@ -12,25 +12,27 @@
     --color-brand-hover:    #1D4ED8;
     --color-brand-active:   #1E40AF;
 
-    /* Acento (dorado) */
-    --color-accent:         #EAB308;
-    --color-accent-hover:   #CA8A04;
+    /* Acento (dorado) — oscurecido para contraste sobre fondo claro */
+    --color-accent:         #B45309;
+    --color-accent-hover:   #92400E;
 
-    /* Fondos */
-    --color-bg-main:        #0D1B2A;
-    --color-bg-secondary:   #111C2E;
-    --color-bg-card:        #1A2535;
-    --color-bg-hover:       #2D3F55;
+    /* Fondos — tema claro azulado inspirado en el logo */
+    --color-bg-main:        #F0F4F8;
+    --color-bg-secondary:   #E2EBF4;
+    --color-bg-card:        #FFFFFF;
+    --color-bg-hover:       #D4E2F0;
+    --color-bg-surface:     #0D1B2A;
+    --color-bg-surface-hover: #1A2D42;
 
-    /* Texto */
-    --color-text-primary:   #FFFFFF;
-    --color-text-secondary: #9CA3AF;
+    /* Texto — invertido para fondo claro */
+    --color-text-primary:   #0D1B2A;
+    --color-text-secondary: #4B6080;
     --color-text-muted:     #6B7280;
-    --color-text-disabled:  #4B5563;
+    --color-text-disabled:  #9CA3AF;
 
     /* Bordes */
-    --color-border:         #374151;
-    --color-divider:        #1F2937;
+    --color-border:         #C8D8E8;
+    --color-divider:        #E2EAF2;
 
     /* Semánticos */
     --color-success:        #10B981;
@@ -41,12 +43,13 @@
     --color-error-bg:       rgba(239, 68, 68, 0.10);
     --color-error-border:   rgba(239, 68, 68, 0.30);
 
-    --color-warning:        #EAB308;
-    --color-info:           #3B82F6;
+    /* Warning oscurecido para contraste sobre fondo claro */
+    --color-warning:        #B45309;
+    --color-info:           #2563EB;
 
-    /* Links */
-    --color-link:           #60A5FA;
-    --color-link-hover:     #93C5FD;
+    /* Links — azul oscuro para contraste sobre fondo claro */
+    --color-link:           #2563EB;
+    --color-link-hover:     #1D4ED8;
 
     /* Tipografía */
     --font-base:            'Sora', sans-serif;
@@ -56,7 +59,7 @@
 
 /* ─── Base ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
     font-family:  var(--font-base);
@@ -65,6 +68,7 @@ body {
     background:   var(--color-bg-main);
     color:        var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
+    overflow-x:   hidden; /* evita scroll horizontal en móvil */
 }
 
 h1 { font-size: clamp(28px, 4vw, 40px);   font-weight: 700; line-height: 1.2; }
@@ -206,66 +210,66 @@ button:hover .icon, button:focus .icon { fill: var(--color-text-primary); }
 
 /* GOLD */
 .category-card--gold {
-    background-color: #243140;
-    border-color: #5C4D24;
+    background-color: #FEF9EC;
+    border-color: #F5D87A;
 }
 
 .category-card--gold:hover {
-    background-color: #2A3748;
+    background-color: #FEF3CC;
 }
 
 .category-card--gold .category-card-icon {
-    color: #EAB308;
-    background-color: rgba(234, 179, 8, 0.08);
-    border-color: rgba(92, 77, 36, 0.45);
+    color: #B45309;
+    background-color: rgba(180, 83, 9, 0.08);
+    border-color: rgba(245, 216, 122, 0.60);
 }
 
 .category-card--gold:hover .category-card-title {
-    color: #EAB308;
+    color: #B45309;
 }
 
 .category-card--gold:hover .category-card-icon {
-    border-color: #EAB308;
+    border-color: #B45309;
 }
 
 /* BLUE */
 .category-card--blue {
-    background-color: #1F2D40;
-    border-color: #3F5E85;
+    background-color: #EFF6FF;
+    border-color: #BFDBFE;
 }
 
 .category-card--blue:hover {
-    background-color: #26364C;
+    background-color: #DBEAFE;
 }
 
 .category-card--blue .category-card-icon {
-    color: #60A5FA;
-    background-color: rgba(96, 165, 250, 0.10);
-    border-color: rgba(63, 94, 133, 0.45);
+    color: #2563EB;
+    background-color: rgba(37, 99, 235, 0.08);
+    border-color: rgba(191, 219, 254, 0.80);
 }
 
 .category-card--blue:hover .category-card-title {
-    color: #60A5FA;
+    color: #2563EB;
 }
 
 .category-card--blue:hover .category-card-icon {
-    border-color: #60A5FA;
+    border-color: #2563EB;
 }
 
 /* HYBRID */
 .category-card--hybrid {
-    background-color: #223245;
-    border-color: #556D86;
+    background-color: #F0F6FF;
+    border-color: #C5D8F0;
 }
 
 .category-card--hybrid:hover {
-    background-color: #29394C;
+    background-color: #E2EEF8;
 }
 
 .category-card--hybrid .category-card-icon {
     color: #CFAE4B;
-    background-color: rgba(207, 174, 75, 0.08);
-    border-color: rgba(85, 109, 134, 0.45);
+    background-color: rgba(207, 174, 75, 0.10);
+    border-color: rgba(207, 174, 75, 0.35);
 }
 
 .category-card--hybrid:hover .category-card-title {

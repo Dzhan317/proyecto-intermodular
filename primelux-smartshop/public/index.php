@@ -27,7 +27,7 @@ if (session_status() === PHP_SESSION_NONE) {
         'path'     => '/',
         'secure'   => (APP_ENV === 'production'),
         'httponly' => true,
-        'samesite' => 'Strict',
+        'samesite' => 'Lax',    // Lax permite redirecciones GET externas (necesario para Stripe)
     ]);
     session_start();
 }
@@ -67,3 +67,4 @@ try {
         }
     }
 }
+

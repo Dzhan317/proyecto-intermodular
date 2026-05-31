@@ -10,28 +10,31 @@
 function initPasswordToggle(inputId, buttonId, iconId) {
     var input  = document.getElementById(inputId);
     var button = document.getElementById(buttonId);
-    var icon   = document.getElementById(iconId);
+    var iconShow = document.getElementById(iconId);
+    var iconHide = document.getElementById(iconId + 'Hide');
 
-    if (!input || !button || !icon) return;
-
-    var iconShow = window.APP_URL + '/assets/img/icons/ojo.svg';
-    var iconHide = window.APP_URL + '/assets/img/icons/ojos-cruzados.svg';
+    if (!input || !button || !iconShow) return;
 
     button.addEventListener('click', function () {
         var isHidden = input.type === 'password';
-        input.type   = isHidden ? 'text' : 'password';
-        icon.src     = isHidden ? iconHide : iconShow;
-        icon.alt     = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
+        input.type = isHidden ? 'text' : 'password';
+        // Alterna entre los dos SVGs inline
+        iconShow.classList.toggle('hidden', isHidden);
+        if (iconHide) iconHide.classList.toggle('hidden', !isHidden);
     });
 }
 
 /* ─── Indicador de fuerza de contraseña ───────────────────────────────────── */
 
+// Reglas NIST 2025 — longitud como factor principal, 1 de cada tipo.
+// Si cambias estos valores, actualiza también:
+//   - AuthService::validatePasswordStrength()         (backend)
+//   - app/Views/auth/partials/password-requirements.php (textos HTML)
 var PASSWORD_RULES = {
-    'req-length':  function (v) { return v.length >= 10; },
-    'req-upper':   function (v) { return (v.match(/[A-Z]/g) || []).length >= 2; },
-    'req-lower':   function (v) { return (v.match(/[a-z]/g) || []).length >= 2; },
-    'req-number':  function (v) { return (v.match(/[0-9]/g) || []).length >= 2; },
+    'req-length':  function (v) { return v.length >= 12; },
+    'req-upper':   function (v) { return (v.match(/[A-Z]/g) || []).length >= 1; },
+    'req-lower':   function (v) { return (v.match(/[a-z]/g) || []).length >= 1; },
+    'req-number':  function (v) { return (v.match(/[0-9]/g) || []).length >= 1; },
     'req-special': function (v) { return /[^A-Za-z0-9]/.test(v); },
 };
 
