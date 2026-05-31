@@ -29,12 +29,12 @@ $statusMap = [
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-[var(--color-border)]">
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Pedido</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Cliente</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Fecha</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Cambiar estado</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Pedido</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Cliente</th>
+                            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Fecha</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Total</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Estado</th>
+                            <th class="px-3 md:px-6 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Cambiar estado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -42,29 +42,29 @@ $statusMap = [
                             $s = $statusMap[$order['status']] ?? ['label' => ucfirst($order['status']), 'color' => 'text-[var(--color-text-muted)] bg-[var(--color-bg-secondary)] border-[var(--color-border)]'];
                         ?>
                             <tr class="border-b border-[var(--color-divider)] hover:bg-[var(--color-bg-hover)]/30 transition-colors last:border-b-0">
-                                <td class="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
+                                <td class="px-3 md:px-6 py-4 font-semibold text-[var(--color-text-primary)]">
                                     #<?= (int) $order['id'] ?>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 md:px-6 py-4">
                                     <p class="text-[var(--color-text-primary)] font-medium">
                                         <?= htmlspecialchars($order['user_name'] . ' ' . $order['user_last_name']) ?>
                                     </p>
-                                    <p class="text-xs text-[var(--color-text-muted)]">
+                                    <p class="hidden md:block text-xs text-[var(--color-text-muted)]">
                                         <?= htmlspecialchars($order['user_email']) ?>
                                     </p>
                                 </td>
-                                <td class="px-6 py-4 text-[var(--color-text-muted)]">
+                                <td class="hidden md:table-cell px-6 py-4 text-[var(--color-text-muted)]">
                                     <?= date('d/m/Y', strtotime($order['created_at'])) ?>
                                 </td>
-                                <td class="px-6 py-4 font-semibold text-[var(--color-warning)]">
+                                <td class="px-3 md:px-6 py-4 font-semibold text-[var(--color-warning)]">
                                     <?= number_format((float) $order['total'], 2, ',', '.') ?> €
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 md:px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border <?= $s['color'] ?>">
                                         <?= $s['label'] ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-3 md:px-6 py-4 text-right">
                                     <form method="POST"
                                           action="<?= APP_URL ?>/admin/orders/<?= (int) $order['id'] ?>"
                                           class="inline-flex items-center gap-2">

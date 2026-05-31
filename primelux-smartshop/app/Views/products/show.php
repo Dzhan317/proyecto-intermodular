@@ -7,8 +7,9 @@
 ob_start();
 
 $price    = number_format((float) $product['base_price'], 2, ',', '.') . ' €';
-$stock    = (int) ($variant['stock'] ?? 0);
-$hasStock = $stock > 0;
+// Nombres propios para evitar colisión con $stock/$hasStock que sobreescribe product-card.php en el foreach de relacionados
+$mainStock    = (int) ($product['stock'] ?? 0);
+$mainHasStock = $mainStock > 0;
 $docRoot  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
 
 // Separa imagen principal y galería
@@ -79,24 +80,45 @@ $hasMainImage = $mainImage['image_url'] && file_exists($docRoot . $mainImage['im
         <?php endif; ?>
 
         <!-- Imagen principal -->
-        <div class="flex-1 bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)]
-                    overflow-hidden aspect-square flex items-center justify-center p-8">
-            <?php if ($hasMainImage): ?>
-                <img id="mainProductImage"
-                     src="<?= APP_URL . htmlspecialchars($mainImage['image_url']) ?>"
-                     alt="<?= htmlspecialchars($product['name']) ?>"
-                     class="w-full h-full object-contain transition-opacity duration-200">
-            <?php else: ?>
-                <div class="flex flex-col items-center gap-3 text-[var(--color-border)]">
-                    <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586
-                                 a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2
-                                 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <p class="text-sm">Imagen no disponible</p>
-                </div>
+        <div class="flex-1 relative">
+            <?php if (!$mainHasStock): ?>
+                <span class="absolute top-3 left-3 z-10 inline-flex items-center
+                             bg-[var(--color-error)] text-white text-xs font-semibold
+                             px-2.5 py-1 rounded-lg shadow-sm pointer-events-none">
+                    Sin stock
+                </span>
+            <?php elseif ($mainStock === 1): ?>
+                <span class="absolute top-3 left-3 z-10 inline-flex items-center
+                             bg-[var(--color-error)] text-white text-xs font-semibold
+                             px-2.5 py-1 rounded-lg shadow-sm pointer-events-none">
+                    ¡Última unidad!
+                </span>
+            <?php elseif ($mainStock <= 3): ?>
+                <span class="absolute top-3 left-3 z-10 inline-flex items-center
+                             bg-[var(--color-warning)] text-white text-xs font-semibold
+                             px-2.5 py-1 rounded-lg shadow-sm pointer-events-none">
+                    Solo quedan <?= $mainStock ?> unidades
+                </span>
             <?php endif; ?>
+            <div class="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)]
+                        overflow-hidden aspect-square flex items-center justify-center p-8">
+                <?php if ($hasMainImage): ?>
+                    <img id="mainProductImage"
+                         src="<?= APP_URL . htmlspecialchars($mainImage['image_url']) ?>"
+                         alt="<?= htmlspecialchars($product['name']) ?>"
+                         class="w-full h-full object-contain transition-opacity duration-200">
+                <?php else: ?>
+                    <div class="flex flex-col items-center gap-3 text-[var(--color-border)]">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586
+                                     a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2
+                                     0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm">Imagen no disponible</p>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -123,22 +145,7 @@ $hasMainImage = $mainImage['image_url'] && file_exists($docRoot . $mainImage['im
 
         <!-- Badge de stock -->
         <div class="mb-5">
-            <?php if (!$hasStock): ?>
-                <span class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-error)]">
-                    <span class="w-2 h-2 rounded-full bg-[var(--color-error)] flex-shrink-0"></span>
-                    Sin stock
-                </span>
-            <?php elseif ($stock === 1): ?>
-                <span class="inline-flex items-center gap-2 rounded-md border border-[var(--color-error)]
-                             bg-[var(--color-error-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--color-error)]">
-                    ¡Última unidad!
-                </span>
-            <?php elseif ($stock <= 3): ?>
-                <span class="inline-flex items-center gap-2 rounded-md border border-[var(--color-warning)]
-                             bg-[var(--color-bg-secondary)] px-3 py-1.5 text-sm font-semibold text-[var(--color-warning)]">
-                    Solo quedan <?= $stock ?> unidades
-                </span>
-            <?php else: ?>
+            <?php if ($mainHasStock && $mainStock > 3): ?>
                 <span class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-success)]">
                     <span class="w-2 h-2 rounded-full bg-[var(--color-success)] flex-shrink-0"></span>
                     En stock
@@ -154,7 +161,7 @@ $hasMainImage = $mainImage['image_url'] && file_exists($docRoot . $mainImage['im
         <?php endif; ?>
 
         <!-- Acciones -->
-        <?php if ($hasStock): ?>
+        <?php if ($mainHasStock): ?>
             <div class="space-y-3">
                 <div class="flex items-center gap-3">
                     <label class="text-sm text-[var(--color-text-secondary)]">Cantidad:</label>
@@ -215,7 +222,7 @@ $hasMainImage = $mainImage['image_url'] && file_exists($docRoot . $mainImage['im
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    initQuantitySelector('qtyMinus', 'qtyPlus', 'qtyValue', <?= $stock ?>);
+    initQuantitySelector('qtyMinus', 'qtyPlus', 'qtyValue', <?= $mainStock ?>);
 
     var cartQtyInput = document.getElementById('cartQuantity');
     var qtyMinus     = document.getElementById('qtyMinus');

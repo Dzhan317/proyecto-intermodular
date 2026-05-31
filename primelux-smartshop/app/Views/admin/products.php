@@ -15,7 +15,7 @@ $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
         <form method="GET" action="<?= APP_URL ?>/admin/products" class="flex-1 max-w-sm">
             <div class="relative">
                 <input type="text" name="q" value="<?= htmlspecialchars($search) ?>"
-                       placeholder="Buscar productos..."
+                       placeholder="Buscar productos... (Enter para buscar)"
                        class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)]
                               placeholder-[var(--color-text-muted)] border border-[var(--color-border)]
                               rounded-xl pl-4 pr-10 py-2.5 text-sm focus:outline-none

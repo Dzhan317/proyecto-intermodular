@@ -170,7 +170,7 @@ $lastName   = htmlspecialchars($user['last_name']    ?? '');
             </div>
 
             <!-- Método de envío -->
-            <div class="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-6">
+            <div class="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-6 mt-6">
                 <h2 class="text-base font-semibold text-[var(--color-text-primary)] mb-6">
                     Método de envío
                 </h2>
@@ -213,7 +213,7 @@ $lastName   = htmlspecialchars($user['last_name']    ?? '');
             <button type="submit"
                     class="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)]
                            text-white font-semibold py-3.5 rounded-xl text-sm
-                           transition-colors">
+                           transition-colors mt-6">
                 Continuar al pago
             </button>
 

@@ -74,6 +74,11 @@ class OrderModel
                 ) VALUES (?, ?, ?, ?, ?, ?)
             ');
 
+            // Prepara el UPDATE de stock — GREATEST(0, ...) evita stock negativo
+            $stmtStock = $this->db->prepare('
+                UPDATE variants SET stock = GREATEST(0, stock - ?) WHERE id = ?
+            ');
+
             foreach ($cartItems as $item) {
                 $subtotal = round($item['price'] * $item['quantity'], 2);
                 $stmtItem->execute([
@@ -83,6 +88,12 @@ class OrderModel
                     $item['quantity'],
                     $item['price'],
                     $subtotal,
+                ]);
+
+                // Descuenta el stock de esta variante
+                $stmtStock->execute([
+                    $item['quantity'],
+                    $item['variant_id'],
                 ]);
             }
 
@@ -189,7 +200,7 @@ class OrderModel
         return $stmt->fetch();
     }
 
-    /** Pedidos de un usuario para el historial (Fase 7). */
+    /** Pedidos de un usuario para el historial (Fase 8). */
     public function getByUser(int $userId): array
     {
         $stmt = $this->db->prepare('

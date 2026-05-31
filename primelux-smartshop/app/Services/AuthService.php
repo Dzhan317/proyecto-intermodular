@@ -106,6 +106,22 @@ class AuthService
         );
     }
 
+    /**
+     * Valida si un token de reset existe, no ha sido usado y no ha expirado.
+     * Se usa en resetPasswordForm() para mostrar el error antes de renderizar el formulario.
+     */
+    public function isValidResetToken(string $token): bool
+    {
+        $tokenHash = hash('sha256', $token);
+        $stmt = $this->db->prepare('
+            SELECT id FROM password_resets
+            WHERE token_hash = ? AND used = 0 AND expires_at > NOW()
+            LIMIT 1
+        ');
+        $stmt->execute([$tokenHash]);
+        return (bool) $stmt->fetch();
+    }
+
     public function resetPassword(string $token, string $password, string $confirm): array
     {
         if ($password !== $confirm) {

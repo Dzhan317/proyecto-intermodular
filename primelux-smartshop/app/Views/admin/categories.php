@@ -12,21 +12,24 @@ $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
 
     <!-- Cabecera: buscador + botón añadir -->
     <div class="flex items-center justify-between gap-4 mb-6">
-        <div class="relative max-w-xs w-full">
+        <form method="GET" action="<?= APP_URL ?>/admin/categories" class="relative max-w-xs w-full">
             <input type="text"
-                   id="categorySearch"
-                   placeholder="Buscar categoría..."
+                   name="q"
+                   value="<?= htmlspecialchars($search ?? '') ?>"
+                   placeholder="Buscar categoría... (Enter para buscar)"
                    class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)]
                           placeholder-[var(--color-text-muted)] border border-[var(--color-border)]
                           rounded-xl pl-4 pr-9 py-2.5 text-sm
                           focus:outline-none focus:border-[var(--color-brand)]
                           focus:ring-1 focus:ring-[var(--color-brand)] transition-colors">
-            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </div>
+            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2">
+                <svg class="w-4 h-4 text-[var(--color-text-muted)]"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </form>
         <a href="<?= APP_URL ?>/admin/categories/create"
            class="flex-shrink-0 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white
                   font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
@@ -53,8 +56,7 @@ $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
                 </thead>
                 <tbody>
                     <?php foreach ($categories as $cat): ?>
-                        <tr class="category-row border-b border-[var(--color-divider)] hover:bg-[var(--color-bg-hover)]/30 transition-colors last:border-b-0"
-                            data-name="<?= strtolower(htmlspecialchars($cat['name'])) ?>">
+                        <tr class="border-b border-[var(--color-divider)] hover:bg-[var(--color-bg-hover)]/30 transition-colors last:border-b-0">
                             <td class="px-6 py-4 font-medium text-[var(--color-text-primary)]">
                                 <?= htmlspecialchars($cat['name']) ?>
                             </td>
@@ -138,20 +140,6 @@ $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('categorySearch');
-    if (!input) return;
-
-    input.addEventListener('input', function () {
-        var query = input.value.toLowerCase().trim();
-        document.querySelectorAll('.category-row').forEach(function (row) {
-            var name = row.getAttribute('data-name') || '';
-            row.style.display = name.includes(query) ? '' : 'none';
-        });
-    });
-});
-</script>
 
 <?php
 $content = ob_get_clean();

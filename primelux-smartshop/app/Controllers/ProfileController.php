@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 /*
  * Gestiona las páginas del perfil de usuario.
- * Datos personales (solo nombre y apellidos), cambio de contraseña.
+ * Datos personales, cambio de contraseña, seguridad y dirección guardada.
  */
 
 require_once APP_PATH . '/Models/UserModel.php';
+require_once APP_PATH . '/Models/OrderModel.php';
 
 class ProfileController extends Controller
 {
@@ -25,12 +26,12 @@ class ProfileController extends Controller
         $user = $this->userModel->findById((int) $_SESSION['user_id']);
 
         $this->view('profile.index', [
-            'pageTitle'  => 'Mi perfil | PrimeLux SmartShop',
-            'user'       => $user,
-            'activeTab'  => 'profile',
-            'csrfToken'  => $this->csrfToken(),
-            'success'    => $_SESSION['profile_success'] ?? '',
-            'error'      => $_SESSION['profile_error']   ?? '',
+            'pageTitle' => 'Mi perfil | PrimeLux SmartShop',
+            'user'      => $user,
+            'activeTab' => 'profile',
+            'csrfToken' => $this->csrfToken(),
+            'success'   => $_SESSION['profile_success'] ?? '',
+            'error'     => $_SESSION['profile_error']   ?? '',
         ]);
 
         unset($_SESSION['profile_success'], $_SESSION['profile_error']);
@@ -61,8 +62,28 @@ class ProfileController extends Controller
             $lastName
         );
 
+        // Actualiza la sesión para que el header refleje el cambio inmediatamente
+        $_SESSION['user_name']      = $name;
+        $_SESSION['user_last_name'] = $lastName;
+
         $_SESSION['profile_success'] = 'Datos actualizados correctamente.';
         $this->redirect(APP_URL . '/profile');
+    }
+
+    // GET /profile/addresses — dirección guardada
+    public function addresses(array $params): void
+    {
+        $this->requireAuth();
+
+        $orderModel = new OrderModel();
+        $address    = $orderModel->getDefaultAddress((int) $_SESSION['user_id']);
+
+        $this->view('profile.addresses', [
+            'pageTitle' => 'Dirección | PrimeLux SmartShop',
+            'user'      => $this->userModel->findById((int) $_SESSION['user_id']),
+            'address'   => $address ?: null,
+            'activeTab' => 'addresses',
+        ]);
     }
 
     // GET /profile/security — cambio de contraseña y sesión activa
@@ -73,13 +94,13 @@ class ProfileController extends Controller
         $user = $this->userModel->findById((int) $_SESSION['user_id']);
 
         $this->view('profile.security', [
-            'pageTitle'  => 'Seguridad | PrimeLux SmartShop',
-            'user'       => $user,
-            'activeTab'  => 'security',
-            'csrfToken'  => $this->csrfToken(),
-            'device'     => $this->detectDevice(),
-            'success'    => $_SESSION['profile_success'] ?? '',
-            'error'      => $_SESSION['profile_error']   ?? '',
+            'pageTitle' => 'Seguridad | PrimeLux SmartShop',
+            'user'      => $user,
+            'activeTab' => 'security',
+            'csrfToken' => $this->csrfToken(),
+            'device'    => $this->detectDevice(),
+            'success'   => $_SESSION['profile_success'] ?? '',
+            'error'     => $_SESSION['profile_error']   ?? '',
         ]);
 
         unset($_SESSION['profile_success'], $_SESSION['profile_error']);
@@ -127,19 +148,19 @@ class ProfileController extends Controller
         $this->redirect(APP_URL . '/profile/security');
     }
 
-    // ─── Helpers privados ────────────────────────────────────────────────────
+    // ─── Helpers privados ─────────────────────────────────────────────────────
 
     private function detectDevice(): string
     {
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
         $os = match (true) {
-            str_contains($ua, 'Windows')                            => 'Windows',
+            str_contains($ua, 'Windows')                              => 'Windows',
             str_contains($ua, 'iPhone') || str_contains($ua, 'iPad') => 'iOS',
-            str_contains($ua, 'Android')                            => 'Android',
-            str_contains($ua, 'Mac')                                => 'Mac',
-            str_contains($ua, 'Linux')                              => 'Linux',
-            default                                                 => 'Dispositivo desconocido',
+            str_contains($ua, 'Android')                              => 'Android',
+            str_contains($ua, 'Mac')                                  => 'Mac',
+            str_contains($ua, 'Linux')                                => 'Linux',
+            default                                                   => 'Dispositivo desconocido',
         };
 
         $browser = match (true) {

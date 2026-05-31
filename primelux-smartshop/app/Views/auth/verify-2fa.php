@@ -134,4 +134,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <?php
 $content = ob_get_clean();
-require_once APP_PATH . '/Views/layouts/auth.php';
+require APP_PATH . '/Views/layouts/auth.php';

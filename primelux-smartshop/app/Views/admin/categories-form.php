@@ -10,9 +10,10 @@ $formAction = $isEdit
     ? APP_URL . '/admin/categories/' . (int) $category['id'] . '/edit'
     : APP_URL . '/admin/categories/create';
 
-$name     = htmlspecialchars($_POST['name']     ?? $category['name']     ?? '');
-$featured = (bool) ($_POST['featured'] ?? $category['featured'] ?? false);
-$status   = $_POST['status'] ?? $category['status'] ?? 'active';
+$name        = htmlspecialchars($_POST['name']        ?? $category['name']        ?? '');
+$description = htmlspecialchars($_POST['description'] ?? $category['description'] ?? '');
+$featured    = (bool) ($_POST['featured'] ?? $category['featured'] ?? false);
+$status      = $_POST['status'] ?? $category['status'] ?? 'active';
 ?>
 
 <div class="pt-2 max-w-md">
@@ -44,6 +45,23 @@ $status   = $_POST['status'] ?? $category['status'] ?? 'active';
                               transition-colors">
                 <p class="text-xs text-[var(--color-text-muted)] mt-1.5">
                     El slug se genera automáticamente a partir del nombre.
+                </p>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-5">
+                <label for="description" class="block text-sm text-[var(--color-text-secondary)] mb-2">
+                    Descripción
+                </label>
+                <textarea id="description" name="description" rows="3" maxlength="500"
+                          placeholder="Describe brevemente el contenido de esta categoría..."
+                          class="w-full bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]
+                                 placeholder-[var(--color-text-muted)] border border-[var(--color-border)]
+                                 rounded-xl px-4 py-3 text-sm focus:outline-none resize-none
+                                 focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)]
+                                 transition-colors"><?= $description ?></textarea>
+                <p class="text-xs text-[var(--color-text-muted)] mt-1.5">
+                    Opcional. Máximo 500 caracteres.
                 </p>
             </div>
 

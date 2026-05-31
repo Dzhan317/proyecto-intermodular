@@ -23,7 +23,10 @@ class AuthController extends Controller
 
     public function loginForm(array $params): void
     {
-        if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
+        if ($this->isLoggedIn()) {
+            $redirectTo = ($_SESSION['user_role'] ?? 'customer') === 'admin' ? '/admin' : '/';
+            $this->redirect(APP_URL . $redirectTo);
+        }
 
         // Mensaje de confirmación tras restablecer contraseña
         $success = isset($_GET['reset']) ? 'Contraseña actualizada correctamente. Inicia sesión.' : '';
@@ -72,7 +75,10 @@ class AuthController extends Controller
 
     public function passwordForm(array $params): void
     {
-        if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
+        if ($this->isLoggedIn()) {
+            $redirectTo = ($_SESSION['user_role'] ?? 'customer') === 'admin' ? '/admin' : '/';
+            $this->redirect(APP_URL . $redirectTo);
+        }
         if (empty($_SESSION['auth_email'])) $this->redirect(APP_URL . '/login');
 
         $this->view('auth.login', [
@@ -171,7 +177,9 @@ class AuthController extends Controller
             $_SESSION['pre_auth_user_name']
         );
 
-        $this->redirect(APP_URL . '/');
+        // Redirige al panel si es admin, a la tienda si es cliente
+        $redirectTo = ($user['role'] ?? 'customer') === 'admin' ? '/admin' : '/';
+        $this->redirect(APP_URL . $redirectTo);
     }
 
     public function resend2fa(array $params): void
@@ -197,7 +205,10 @@ class AuthController extends Controller
 
     public function registerForm(array $params): void
     {
-        if ($this->isLoggedIn()) $this->redirect(APP_URL . '/');
+        if ($this->isLoggedIn()) {
+            $redirectTo = ($_SESSION['user_role'] ?? 'customer') === 'admin' ? '/admin' : '/';
+            $this->redirect(APP_URL . $redirectTo);
+        }
 
         $this->view('auth.register', [
             'pageTitle' => 'Crear cuenta | PrimeLux SmartShop',
@@ -282,10 +293,15 @@ class AuthController extends Controller
 
     public function resetPasswordForm(array $params): void
     {
+        $token   = $params['token'] ?? '';
+        // Valida el token antes de renderizar — si expiró, la vista muestra el aviso
+        $expired = !$this->authService->isValidResetToken($token);
+
         $this->view('auth.reset-password', [
             'pageTitle' => 'Restablecer contraseña | PrimeLux SmartShop',
             'csrfToken' => $this->csrfToken(),
-            'token'     => $params['token'] ?? '',
+            'token'     => $token,
+            'expired'   => $expired,
         ]);
     }
 

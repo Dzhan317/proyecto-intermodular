@@ -46,7 +46,7 @@
     <script src="<?= APP_URL ?>/assets/js/app.js"></script>
     <script src="<?= APP_URL ?>/assets/js/auth.js"></script>
 </head>
-<body class="bg-[var(--color-bg-main)] min-h-screen flex flex-col items-center justify-center px-4">
+<body class="bg-[var(--color-bg-surface)] min-h-screen flex flex-col items-center justify-center px-4">
 
     <?php if (!empty($_SESSION['csrf_error'])): ?>
         <div class="fixed top-0 left-0 right-0 z-50 bg-[var(--color-warning)] text-[var(--color-bg-main)]">
@@ -60,7 +60,7 @@
                     <p class="text-sm font-medium"><?= htmlspecialchars($_SESSION['csrf_error']) ?></p>
                 </div>
                 <button onclick="this.parentElement.parentElement.remove()"
-                        class="flex-shrink-0 text-[var(--color-bg-main)] hover:opacity-70 transition-opacity"
+                        class="flex-shrink-0 text-[var(--color-text-primary)] hover:opacity-70 transition-opacity"
                         aria-label="Cerrar aviso">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -101,9 +101,9 @@
 
         <p class="text-center text-[var(--color-text-muted)] text-xs mt-6">
             Al continuar, aceptas nuestros
-            <a href="<?= APP_URL ?>/terms"   class="text-[var(--color-link)] hover:text-[var(--color-link-hover)]">Términos de uso</a>
+            <a href="<?= APP_URL ?>/legal/terms"   class="text-[var(--color-link)] hover:text-[var(--color-link-hover)]">Términos de uso</a>
             y la
-            <a href="<?= APP_URL ?>/privacy" class="text-[var(--color-link)] hover:text-[var(--color-link-hover)]">Política de privacidad</a>.
+            <a href="<?= APP_URL ?>/legal/privacy" class="text-[var(--color-link)] hover:text-[var(--color-link-hover)]">Política de privacidad</a>.
         </p>
 
     </div>

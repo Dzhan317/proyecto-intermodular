@@ -5,6 +5,12 @@ declare(strict_types=1);
  * Controlador de productos.
  * index() gestiona el buscador (GET /products?q=).
  * show()  muestra el detalle de un producto.
+ *
+ * Motor de recomendaciones:
+ * - Registra interacción tipo 'view' al visitar un producto
+ * - Actualiza user_interests con peso WEIGHT_VIEW (1 punto)
+ * - Usa getSmartRelated() con userId para aplicar anti-repetición (Mejora 5)
+ * - Fallback a getRelated() para usuarios no autenticados
  */
 
 require_once APP_PATH . '/Models/ProductModel.php';
@@ -19,16 +25,13 @@ class ProductController extends Controller
     {
         $query = trim($_GET['q'] ?? '');
 
-        // Sin término de búsqueda → vuelve a la home
         if ($query === '') {
             $this->redirect(APP_URL . '/');
         }
 
-        // Limita la longitud del término para evitar consultas abusivas
         $query = mb_substr($query, 0, 100);
 
         $productModel = new ProductModel();
-
         $page     = max(1, (int) ($_GET['page'] ?? 1));
         $total    = $productModel->countSearch($query);
         $pages    = max(1, (int) ceil($total / self::PER_PAGE));
@@ -60,18 +63,45 @@ class ProductController extends Controller
 
         $variant = $productModel->getDefaultVariant($product['id']);
 
+        // Galería de imágenes — principal + secundarias
+        $images = $productModel->getImages($product['id']);
+
+        // Categoría
         $categoryId = 0;
         if (!empty($product['category_slug'])) {
             $cat = (new CategoryModel())->getBySlug($product['category_slug']);
             if ($cat) $categoryId = (int) $cat['id'];
         }
 
-        $related = $productModel->getRelated($product['id'], $categoryId, 4);
+        // Motor de recomendaciones — solo si el usuario está autenticado
+        if ($this->isLoggedIn()) {
+            $userId = (int) $_SESSION['user_id'];
+
+            // Registra la visita (Mejora 2 — tipo 'view', evita duplicados diarios)
+            $productModel->recordInteraction($userId, (int) $product['id'], 'view');
+
+            // Actualiza interés por categoría con peso VIEW (1 punto)
+            if ($categoryId > 0) {
+                $productModel->updateUserInterest($userId, $categoryId, 'view');
+            }
+
+            // Productos relacionados inteligentes con anti-repetición (Mejoras 1,4,5)
+            $related = $productModel->getSmartRelated(
+                (int) $product['id'],
+                $categoryId,
+                4,
+                $userId
+            );
+        } else {
+            // Usuario no autenticado — relacionados aleatorios sin personalización
+            $related = $productModel->getRelated((int) $product['id'], $categoryId, 4);
+        }
 
         $this->view('products.show', [
             'pageTitle' => htmlspecialchars($product['name']) . ' | PrimeLux SmartShop',
             'product'   => $product,
             'variant'   => $variant,
+            'images'    => $images,
             'related'   => $related,
             'csrfToken' => $this->csrfToken(),
         ]);

@@ -34,7 +34,7 @@ class ProductModel
             SELECT p.*, pi.image_url, COALESCE(v.stock, 0) AS stock
             FROM products p
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE p.status = "active"
             ORDER BY p.created_at DESC
             LIMIT ?
@@ -121,7 +121,7 @@ class ProductModel
             FROM products p
             INNER JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE {$where} ORDER BY {$orderBy} LIMIT ? OFFSET ?
         ");
         $stmt->execute([...$bindings, $perPage, $offset]);
@@ -134,7 +134,7 @@ class ProductModel
         $stmt = $this->db->prepare("
             SELECT COUNT(DISTINCT p.id) FROM products p
             INNER JOIN product_categories pc ON pc.product_id = p.id
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE {$where}
         ");
         $stmt->execute($bindings);
@@ -151,7 +151,7 @@ class ProductModel
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN categories c ON c.id = pc.category_id
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE p.slug = ? AND p.status = "active" LIMIT 1
         ');
         $stmt->execute([$slug]);
@@ -172,7 +172,7 @@ class ProductModel
             FROM products p
             INNER JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE pc.category_id = ? AND p.id != ? AND p.status = "active"
             ORDER BY RAND() LIMIT ?
         ');
@@ -316,7 +316,7 @@ class ProductModel
                 ON i2.user_id = i1.user_id AND i2.product_id != i1.product_id
             INNER JOIN products p ON p.id = i2.product_id AND p.status = "active"
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE i1.product_id = ? AND i2.product_id != ?
             GROUP BY p.id
             ORDER BY relevance_score DESC
@@ -347,7 +347,7 @@ class ProductModel
                 FROM products p
                 INNER JOIN product_categories pc ON pc.product_id = p.id
                 LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-                LEFT JOIN variants v ON v.product_id = p.id
+                LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
                 WHERE pc.category_id = ?
                   AND p.id NOT IN ({$placeholders})
                   AND p.status = 'active'
@@ -400,7 +400,7 @@ class ProductModel
                 INNER JOIN product_categories pc ON pc.category_id = ui.category_id
                 INNER JOIN products p ON p.id = pc.product_id AND p.status = 'active'
                 LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-                LEFT JOIN variants v ON v.product_id = p.id
+                LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
                 WHERE ui.user_id = ?
                   AND p.id NOT IN ({$placeholders})
                 ORDER BY ui.interest_score DESC, RAND()
@@ -434,7 +434,7 @@ class ProductModel
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN categories c ON c.id = pc.category_id
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             WHERE p.id = ? LIMIT 1
         ');
         $stmt->execute([$id]);
@@ -450,7 +450,7 @@ class ProductModel
             LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN categories c ON c.id = pc.category_id
-            LEFT JOIN variants v ON v.product_id = p.id
+            LEFT JOIN variants v ON v.product_id = p.id AND v.id = (SELECT MIN(id) FROM variants WHERE product_id = p.id)
             ORDER BY p.created_at DESC LIMIT ? OFFSET ?
         ');
         $stmt->execute([$perPage, $offset]);
@@ -512,6 +512,10 @@ class ProductModel
             if ($variantRow) {
                 $this->db->prepare('UPDATE variants SET stock = ? WHERE id = ?')
                     ->execute([$data['stock'] ?? 0, $variantRow['id']]);
+            } else {
+                // Si el producto no tiene variante, la crea para no perder el stock silenciosamente
+                $this->db->prepare('INSERT INTO variants (product_id, name, extra_price, stock) VALUES (?, "Unidad", 0, ?)')
+                    ->execute([$id, $data['stock'] ?? 0]);
             }
 
             $existing = $this->db->prepare('SELECT product_id FROM product_categories WHERE product_id = ? LIMIT 1');

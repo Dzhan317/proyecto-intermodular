@@ -28,7 +28,7 @@ try {
 }
 
 $isHome  = ($currentUri === '/');
-$isAbout = ($currentUri === '/sobre-nosotros');
+$isAbout = ($currentUri === '/about');
 $isCat   = str_starts_with($currentUri, '/category/');
 
 // Datos del usuario para el desplegable
@@ -41,7 +41,7 @@ if (isset($_SESSION['user_id'])) {
 }
 $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
 ?>
-<header class="bg-[var(--color-bg-secondary)] border-b border-[var(--color-divider)] sticky top-0 z-[80] overflow-visible">
+<header class="bg-[var(--color-bg-surface)] sticky top-0 z-[80] overflow-visible">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20 gap-4">
@@ -54,7 +54,7 @@ $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
             <!-- Buscador desktop — visible solo en md+ -->
             <form method="GET" action="<?= APP_URL ?>/products" class="flex-1 max-w-xl hidden md:block">
                 <div class="relative">
-                    <input type="text" name="q" placeholder="Buscar productos..."
+                    <input type="text" name="q" placeholder="Buscar productos... (Enter para buscar)"
                            class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
                                   border border-[var(--color-border)] rounded-xl pl-4 pr-10 py-2.5 text-sm
                                   focus:outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] transition-colors">
@@ -71,26 +71,38 @@ $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
 
             <div class="flex items-center gap-1">
 
-                <!-- Botón lupa móvil — visible solo en <md -->
+                <!-- Botón hamburguesa — visible solo en <md -->
                 <button type="button"
-                        id="mobileSearchToggle"
-                        aria-label="Abrir buscador"
+                        id="mobileMenuToggle"
+                        aria-label="Abrir menú"
                         aria-expanded="false"
                         class="md:hidden p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)] transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                              d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg id="hamburgerCloseIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
 
-                <!-- Soporte -->
+
+
+                <!-- Soporte — oculto en móvil, visible en md+ -->
                 <?php if ($supportEnabled): ?>
-                    <a href="<?= APP_URL ?>/support" title="Soporte"
-                       class="p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)] transition-colors">
+                    <a href="<?= isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin' ? APP_URL . '/admin/support' : APP_URL . '/support' ?>" title="Soporte"
+                       class="hidden md:flex relative p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)] transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                         </svg>
+                        <!-- Badge mensajes no leídos -->
+                        <span id="supportBadge"
+                              class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1
+                                     bg-[var(--color-error)] text-white text-[10px] font-bold
+                                     rounded-full flex items-center justify-center leading-none">
+                        </span>
                     </a>
                 <?php else: ?>
                     <span title="Soporte próximamente" class="p-2 rounded-xl text-[var(--color-text-disabled)] cursor-not-allowed opacity-70">
@@ -255,7 +267,7 @@ $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
         </div>
     </div>
 
-    <nav class="border-t border-[var(--color-divider)] bg-[var(--color-bg-main)] relative z-[80] overflow-visible">
+    <nav class="bg-[var(--color-bg-surface)] relative z-[80] overflow-visible hidden md:block">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ul class="flex items-center justify-center gap-3 overflow-visible scrollbar-hide py-3">
 
@@ -311,7 +323,7 @@ $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
                 </li>
 
                 <li class="flex-shrink-0">
-                    <a href="<?= APP_URL ?>/sobre-nosotros"
+                    <a href="<?= APP_URL ?>/about"
                        class="block px-5 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap
                               <?= $isAbout
                                   ? 'bg-[var(--color-brand)] text-white'
@@ -324,66 +336,196 @@ $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
         </div>
     </nav>
 
-    <!-- Panel buscador móvil — visible solo en <md, oculto por defecto -->
-    <div id="mobileSearchPanel"
-         class="hidden md:hidden border-t border-[var(--color-divider)] bg-[var(--color-bg-secondary)] px-4 py-3">
-        <form method="GET" action="<?= APP_URL ?>/products">
-            <div class="relative">
-                <input id="mobileSearchInput"
-                       type="text" name="q"
-                       placeholder="Buscar productos..."
-                       autocomplete="off"
-                       class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)]
-                              placeholder-[var(--color-text-muted)] border border-[var(--color-border)]
-                              rounded-xl pl-4 pr-10 py-2.5 text-sm
-                              focus:outline-none focus:border-[var(--color-brand)]
-                              focus:ring-1 focus:ring-[var(--color-brand)] transition-colors">
-                <button type="submit"
-                        class="absolute inset-y-0 right-3 flex items-center text-[var(--color-text-muted)]
-                               hover:text-[var(--color-text-primary)] transition-colors"
-                        aria-label="Buscar">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+
+    <!-- Panel menú móvil — visible solo en <md, oculto por defecto -->
+    <div id="mobileMenuPanel"
+         class="hidden md:hidden border-t border-[var(--color-divider)] bg-[var(--color-bg-surface)]">
+
+        <!-- Buscador dentro del menú móvil -->
+        <div class="px-4 pt-4 pb-2">
+            <form method="GET" action="<?= APP_URL ?>/products">
+                <div class="relative">
+                    <input type="text" name="q" placeholder="Buscar productos... (Enter para buscar)"
+                           class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
+                                  border border-[var(--color-border)] rounded-xl pl-4 pr-10 py-2.5 text-sm
+                                  focus:outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] transition-colors">
+                    <button type="submit"
+                            class="absolute inset-y-0 right-3 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+                            aria-label="Buscar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <ul class="px-4 py-2 space-y-1">
+
+            <!-- Soporte dentro del menú móvil -->
+            <?php if ($supportEnabled): ?>
+            <li>
+                <a href="<?= isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin' ? APP_URL . '/admin/support' : APP_URL . '/support' ?>"
+                   class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
+                          text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]">
+                    <span class="flex items-center gap-3">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                        </svg>
+                        Soporte
+                    </span>
+                    <!-- Badge móvil — se activa por JS igual que el badge del header -->
+                    <span id="supportBadgeMobile"
+                          class="hidden min-w-[18px] h-[18px] px-1
+                                 bg-[var(--color-error)] text-white text-[10px] font-bold
+                                 rounded-full flex items-center justify-center leading-none">
+                    </span>
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <li>
+                <a href="<?= APP_URL ?>/"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
+                          <?= $isHome
+                              ? 'bg-[var(--color-brand)] text-white'
+                              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]' ?>">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Inicio
+                </a>
+            </li>
+
+            <!-- Categorías expandibles en móvil -->
+            <li>
+                <button type="button" id="mobileCategoriesToggle"
+                        class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
+                               <?= $isCat
+                                   ? 'bg-[var(--color-bg-hover)] text-white'
+                                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]' ?>">
+                    <span class="flex items-center gap-3">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Categorías
+                    </span>
+                    <svg id="mobileCategoriesIcon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
-            </div>
-        </form>
+                <?php if (!empty($navCategories)): ?>
+                    <ul id="mobileCategoriesMenu" class="hidden mt-1 ml-4 space-y-1">
+                        <?php foreach ($navCategories as $cat): ?>
+                            <li>
+                                <a href="<?= APP_URL ?>/category/<?= htmlspecialchars($cat['slug']) ?>"
+                                   class="block px-4 py-2.5 rounded-xl text-sm transition-colors
+                                          <?= str_contains($currentUri, '/category/' . $cat['slug'])
+                                              ? 'bg-[var(--color-bg-hover)] text-[var(--color-text-primary)]'
+                                              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]' ?>">
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </li>
+
+            <li>
+                <a href="<?= APP_URL ?>/about"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors
+                          <?= $isAbout
+                              ? 'bg-[var(--color-brand)] text-white'
+                              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card)]' ?>">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Sobre nosotros
+                </a>
+            </li>
+        </ul>
     </div>
 
     <script src="<?= APP_URL ?>/assets/js/header-dropdown.js"></script>
 
     <script>
-    /* ── Buscador móvil — toggle del panel expandible ── */
+    /* ── Menú hamburguesa móvil ── */
     document.addEventListener('DOMContentLoaded', function () {
-        var toggleBtn = document.getElementById('mobileSearchToggle');
-        var panel     = document.getElementById('mobileSearchPanel');
-        var input     = document.getElementById('mobileSearchInput');
+        var menuToggle    = document.getElementById('mobileMenuToggle');
+        var menuPanel     = document.getElementById('mobileMenuPanel');
+        var hamburgerIcon = document.getElementById('hamburgerIcon');
+        var closeIcon     = document.getElementById('hamburgerCloseIcon');
+        var catToggle     = document.getElementById('mobileCategoriesToggle');
+        var catMenu       = document.getElementById('mobileCategoriesMenu');
+        var catIcon       = document.getElementById('mobileCategoriesIcon');
 
-        if (!toggleBtn || !panel) return;
+        if (!menuToggle || !menuPanel) return;
 
-        toggleBtn.addEventListener('click', function (e) {
+        // Abre/cierra el menú principal
+        menuToggle.addEventListener('click', function (e) {
             e.stopPropagation();
-            var isOpen = !panel.classList.contains('hidden');
+            var isOpen = !menuPanel.classList.contains('hidden');
 
             if (isOpen) {
-                panel.classList.add('hidden');
-                toggleBtn.setAttribute('aria-expanded', 'false');
+                menuPanel.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
             } else {
-                panel.classList.remove('hidden');
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                if (input) input.focus();
+                menuPanel.classList.remove('hidden');
+                hamburgerIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+                menuToggle.setAttribute('aria-expanded', 'true');
             }
         });
 
-        // Cierra al pulsar Escape
+        // Expande/colapsa categorías dentro del menú móvil
+        if (catToggle && catMenu) {
+            catToggle.addEventListener('click', function () {
+                var isOpen = !catMenu.classList.contains('hidden');
+                catMenu.classList.toggle('hidden', isOpen);
+                if (catIcon) catIcon.style.transform = isOpen ? '' : 'rotate(180deg)';
+            });
+        }
+
+        // Cierra el menú al pulsar Escape
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
-                panel.classList.add('hidden');
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                toggleBtn.focus();
+            if (e.key === 'Escape' && !menuPanel.classList.contains('hidden')) {
+                menuPanel.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Cierra el menú al hacer clic fuera
+        document.addEventListener('click', function (e) {
+            if (!menuPanel.classList.contains('hidden') &&
+                !menuPanel.contains(e.target) &&
+                !menuToggle.contains(e.target)) {
+                menuPanel.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
             }
         });
     });
     </script>
+    <?php if ($supportEnabled && isset($_SESSION['user_id'])): ?>
+    <script src="<?= APP_URL ?>/assets/js/support-chat.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var unreadUrl = '<?= (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
+            ? APP_URL . '/admin/support/unread'
+            : APP_URL . '/support/unread' ?>';
+        initSupportBadge({ unreadUrl: unreadUrl, badgeId: 'supportBadge' });
+    });
+    </script>
+    <?php endif; ?>
 </header>

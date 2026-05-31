@@ -17,13 +17,13 @@ class CheckoutController extends Controller
     private const SHIPPING_OPTIONS = [
         'standard' => [
             'label'       => 'Envío estándar',
-            'description' => 'Entrega en 3-5 días',
+            'description' => 'Entrega en 2-4 días laborables',
             'cost'        => 0.00,
             'free_from'   => 0.00,
         ],
         'express' => [
             'label'       => 'Envío express',
-            'description' => 'Entrega en 24-48 horas',
+            'description' => 'Entrega en 24 horas',
             'cost'        => 4.99,
             'free_from'   => null,
         ],
@@ -286,8 +286,9 @@ class CheckoutController extends Controller
     {
         $this->requireAuth();
 
-        $_SESSION['cart_error'] = 'El pago fue cancelado. Tu carrito sigue disponible.';
-        $this->redirect(APP_URL . '/cart');
+        $this->view('checkout.cancel', [
+            'pageTitle' => 'Pago cancelado — PrimeLux SmartShop',
+        ]);
     }
 
     // ─── Helpers privados ─────────────────────────────────────────────────────
@@ -337,7 +338,8 @@ class CheckoutController extends Controller
         $orderId     = (int) $order['id'];
         $name        = htmlspecialchars($order['user_name'] ?? '');
         $total       = number_format((float) $order['total'], 2, ',', '.');
-        $shipping    = htmlspecialchars(ucfirst($order['shipping_type'] ?? 'standard'));
+        $shippingLabels = ['standard' => 'Envío estándar', 'express' => 'Envío express', 'pickup_point' => 'Recogida en tienda'];
+        $shipping       = htmlspecialchars($shippingLabels[$order['shipping_type'] ?? 'standard'] ?? ucfirst($order['shipping_type'] ?? 'standard'));
         $street      = htmlspecialchars($order['street'] ?? '');
         $city        = htmlspecialchars($order['city']   ?? '');
         $postalCode  = htmlspecialchars($order['postal_code'] ?? '');

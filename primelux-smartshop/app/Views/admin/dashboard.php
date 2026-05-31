@@ -83,7 +83,7 @@ ob_start();
         <!-- Usuarios -->
         <div class="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Usuarios Registrados</span>
+                <span class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Clientes</span>
                 <div class="w-9 h-9 rounded-xl bg-[var(--color-success)]/10 flex items-center justify-center">
                     <svg class="w-5 h-5 text-[var(--color-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -91,7 +91,13 @@ ob_start();
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-[var(--color-text-primary)]"><?= $totalUsers ?></p>
+            <p class="text-3xl font-bold text-[var(--color-text-primary)]">
+                <?= $activeUsers ?>
+                <span class="text-lg font-normal text-[var(--color-text-muted)]">/ <?= $totalUsers ?></span>
+            </p>
+            <?php if ($blockedUsers > 0): ?>
+                <p class="text-xs text-[var(--color-error)] mt-1"><?= $blockedUsers ?> bloqueado<?= $blockedUsers > 1 ? 's' : '' ?></p>
+            <?php endif; ?>
         </div>
 
         <!-- Productos activos -->
@@ -105,7 +111,10 @@ ob_start();
                     </svg>
                 </div>
             </div>
-            <p class="text-3xl font-bold text-[var(--color-text-primary)]"><?= $totalProducts ?></p>
+            <p class="text-3xl font-bold text-[var(--color-text-primary)]">
+                <?= $totalProducts ?>
+                <span class="text-lg font-normal text-[var(--color-text-muted)]">/ <?= $allProducts ?></span>
+            </p>
         </div>
 
     </div>

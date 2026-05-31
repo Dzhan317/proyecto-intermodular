@@ -2,28 +2,32 @@
 declare(strict_types=1);
 
 /*
- * Panel de administración — Fase 7.
+ * Panel de administración — Fases 7, 8 y 9.
  * Acceso restringido a usuarios con rol 'admin' mediante requireAdmin().
  *
  * Métodos públicos:
- *   dashboard()          → GET  /admin
- *   products()           → GET  /admin/products
- *   createProduct()      → GET  /admin/products/create
- *   storeProduct()       → POST /admin/products/create
- *   editProduct()        → GET  /admin/products/:id/edit
- *   updateProduct()      → POST /admin/products/:id/edit
- *   deleteProduct()      → POST /admin/products/:id/delete
- *   orders()             → GET  /admin/orders
- *   showOrder()          → GET  /admin/orders/:id
- *   updateOrderStatus()  → POST /admin/orders/:id
- *   users()              → GET  /admin/users
- *   updateUserStatus()   → POST /admin/users/:id
- *   categories()         → GET  /admin/categories
- *   createCategory()     → GET  /admin/categories/create
- *   storeCategory()      → POST /admin/categories/create
- *   editCategory()       → GET  /admin/categories/:id/edit
- *   updateCategory()     → POST /admin/categories/:id/edit
- *   deleteCategory()     → POST /admin/categories/:id/delete
+ *   dashboard()             → GET  /admin
+ *   products()              → GET  /admin/products
+ *   createProduct()         → GET  /admin/products/create
+ *   storeProduct()          → POST /admin/products/create
+ *   editProduct()           → GET  /admin/products/:id/edit
+ *   updateProduct()         → POST /admin/products/:id/edit
+ *   deleteProduct()         → POST /admin/products/:id/delete
+ *   orders()                → GET  /admin/orders
+ *   showOrder()             → GET  /admin/orders/:id
+ *   updateOrderStatus()     → POST /admin/orders/:id
+ *   users()                 → GET  /admin/users
+ *   updateUserStatus()      → POST /admin/users/:id
+ *   categories()            → GET  /admin/categories
+ *   createCategory()        → GET  /admin/categories/create
+ *   storeCategory()         → POST /admin/categories/create
+ *   editCategory()          → GET  /admin/categories/:id/edit
+ *   updateCategory()        → POST /admin/categories/:id/edit
+ *   deleteCategory()        → POST /admin/categories/:id/delete
+ *   support()               → GET  /admin/support
+ *   showSupportTicket()     → GET  /admin/support/:id
+ *   replySupport()          → POST /admin/support/:id/message
+ *   updateSupportStatus()   → POST /admin/support/:id/status
  *
  * Helpers privados:
  *   getFlash()           → Lee y limpia admin_success/admin_error de sesión
@@ -33,6 +37,7 @@ declare(strict_types=1);
 require_once APP_PATH . '/Models/ProductModel.php';
 require_once APP_PATH . '/Models/OrderModel.php';
 require_once APP_PATH . '/Models/UserModel.php';
+require_once APP_PATH . '/Models/SupportModel.php';
 require_once APP_PATH . '/Models/CategoryModel.php';
 
 class AdminController extends Controller
@@ -74,8 +79,11 @@ class AdminController extends Controller
         $db = Database::getInstance();
 
         $totalOrders   = (int) $db->query('SELECT COUNT(*) FROM orders')->fetchColumn();
+        $activeUsers   = (int) $db->query('SELECT COUNT(*) FROM users WHERE role = "customer" AND status = "active"')->fetchColumn();
         $totalUsers    = (int) $db->query('SELECT COUNT(*) FROM users WHERE role = "customer"')->fetchColumn();
-        $totalProducts = (int) $db->query('SELECT COUNT(*) FROM products WHERE status = "active"')->fetchColumn();
+        $blockedUsers  = $totalUsers - $activeUsers;
+        $totalProducts    = (int) $db->query('SELECT COUNT(*) FROM products WHERE status = "active"')->fetchColumn();
+        $allProducts      = (int) $db->query('SELECT COUNT(*) FROM products')->fetchColumn();
 
         $totalRevenue = (float) $db->query('
             SELECT COALESCE(SUM(total), 0) FROM orders
@@ -107,8 +115,11 @@ class AdminController extends Controller
             'pageTitle'     => 'Dashboard — PrimeLux Admin',
             'totalOrders'   => $totalOrders,
             'totalRevenue'  => $totalRevenue,
+            'activeUsers'   => $activeUsers,
             'totalUsers'    => $totalUsers,
+            'blockedUsers'  => $blockedUsers,
             'totalProducts' => $totalProducts,
+            'allProducts'   => $allProducts,
             'totalCost'     => $totalCost,
             'grossMargin'   => $grossMargin,
             'marginPct'     => $marginPct,
@@ -259,7 +270,7 @@ class AdminController extends Controller
         $productModel = new ProductModel();
         $productModel->delete($productId);
 
-        $_SESSION['admin_success'] = 'Producto eliminado correctamente.';
+        $_SESSION['admin_success'] = 'Producto desactivado correctamente.';
         $this->redirect(APP_URL . '/admin/products');
     }
 
@@ -400,6 +411,7 @@ class AdminController extends Controller
         $this->redirect(APP_URL . '/admin/users');
     }
 
+
     // ─── Categorías ──────────────────────────────────────────────────────────
 
     // GET /admin/categories
@@ -408,11 +420,22 @@ class AdminController extends Controller
         $this->requireAdmin();
 
         $categoryModel = new CategoryModel();
+        $search        = trim($_GET['q'] ?? '');
         $page          = max(1, (int) ($_GET['page'] ?? 1));
         $perPage       = 5;
         $allCategories = $categoryModel->getAllAdmin();
-        $total         = count($allCategories);
-        $categories    = array_slice($allCategories, ($page - 1) * $perPage, $perPage);
+
+        // Filtrar por búsqueda si se ha introducido un término
+        if ($search !== '') {
+            $allCategories = array_filter(
+                $allCategories,
+                fn($c) => str_contains(strtolower($c['name']), strtolower($search))
+            );
+            $allCategories = array_values($allCategories);
+        }
+
+        $total      = count($allCategories);
+        $categories = array_slice($allCategories, ($page - 1) * $perPage, $perPage);
 
         [$success, $error] = $this->getFlash();
 
@@ -422,6 +445,7 @@ class AdminController extends Controller
             'total'      => $total,
             'page'       => $page,
             'perPage'    => $perPage,
+            'search'     => $search,
             'success'    => $success,
             'error'      => $error,
             'csrfToken'  => $this->csrfToken(),
@@ -448,9 +472,10 @@ class AdminController extends Controller
         $this->requireAdmin();
         $this->validateCsrf();
 
-        $name     = trim($_POST['name']     ?? '');
-        $featured = isset($_POST['featured']) ? 1 : 0;
-        $status   = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
+        $name        = trim($_POST['name']        ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $featured    = isset($_POST['featured']) ? 1 : 0;
+        $status      = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
 
         if (!$name) {
             $_SESSION['admin_error'] = 'El nombre de la categoría es obligatorio.';
@@ -465,7 +490,7 @@ class AdminController extends Controller
             $this->redirect(APP_URL . '/admin/categories/create');
         }
 
-        $categoryModel->create(['name' => $name, 'featured' => $featured, 'status' => $status]);
+        $categoryModel->create(['name' => $name, 'description' => $description, 'featured' => $featured, 'status' => $status]);
 
         $_SESSION['admin_success'] = 'Categoría creada correctamente.';
         $this->redirect(APP_URL . '/admin/categories');
@@ -500,10 +525,11 @@ class AdminController extends Controller
         $this->requireAdmin();
         $this->validateCsrf();
 
-        $categoryId = (int) ($params['id'] ?? 0);
-        $name       = trim($_POST['name'] ?? '');
-        $featured   = isset($_POST['featured']) ? 1 : 0;
-        $status     = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
+        $categoryId  = (int) ($params['id'] ?? 0);
+        $name        = trim($_POST['name']        ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $featured    = isset($_POST['featured']) ? 1 : 0;
+        $status      = in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active';
 
         if (!$name) {
             $_SESSION['admin_error'] = 'El nombre de la categoría es obligatorio.';
@@ -518,7 +544,7 @@ class AdminController extends Controller
             $this->redirect(APP_URL . '/admin/categories/' . $categoryId . '/edit');
         }
 
-        $categoryModel->update($categoryId, ['name' => $name, 'featured' => $featured, 'status' => $status]);
+        $categoryModel->update($categoryId, ['name' => $name, 'description' => $description, 'featured' => $featured, 'status' => $status]);
 
         $_SESSION['admin_success'] = 'Categoría actualizada correctamente.';
         $this->redirect(APP_URL . '/admin/categories');
@@ -534,12 +560,188 @@ class AdminController extends Controller
         $categoryModel = new CategoryModel();
         $result        = $categoryModel->delete($categoryId);
 
-        if ($result) {
-            $_SESSION['admin_success'] = 'Categoría eliminada correctamente.';
+        if ($result['protected']) {
+            $_SESSION['admin_error'] = 'La categoría "Sin categoría" es una categoría de sistema y no puede eliminarse.';
+        } elseif ($result['deleted']) {
+            if ($result['reassigned'] > 0) {
+                $_SESSION['admin_success'] = 'Categoría eliminada. ' . $result['reassigned'] . ' producto(s) reasignado(s) a "Sin categoría".';
+            } else {
+                $_SESSION['admin_success'] = 'Categoría eliminada correctamente.';
+            }
         } else {
-            $_SESSION['admin_error'] = 'No se puede eliminar una categoría que tiene productos asociados.';
+            $_SESSION['admin_error'] = 'No se pudo eliminar la categoría.';
         }
 
         $this->redirect(APP_URL . '/admin/categories');
     }
+
+    // ─── Soporte ─────────────────────────────────────────────────────────────
+
+    // GET /admin/support
+    public function support(array $params): void
+    {
+        $this->requireAdmin();
+
+        $supportModel = new SupportModel();
+        $page         = max(1, (int) ($_GET['page'] ?? 1));
+        $perPage      = 20;
+
+        $conversations = $supportModel->getAll($page, $perPage);
+        $total         = $supportModel->countAll();
+
+        $this->view('admin.support', [
+            'pageTitle'     => 'Soporte — PrimeLux Admin',
+            'conversations' => $conversations,
+            'total'         => $total,
+            'page'          => $page,
+            'perPage'       => $perPage,
+            'csrfToken'     => $this->csrfToken(),
+            ...$this->getFlash(),
+        ]);
+    }
+
+    // GET /admin/support/:id
+    public function showSupportTicket(array $params): void
+    {
+        $this->requireAdmin();
+
+        $id           = (int) ($params['id'] ?? 0);
+        $supportModel = new SupportModel();
+        $conversation = $supportModel->findById($id);
+
+        if (!$conversation) {
+            $this->redirect(APP_URL . '/admin/support');
+        }
+
+        // Marca como leídos los mensajes del cliente al abrir la conversación
+        $supportModel->markAsRead($id, (int) $_SESSION['user_id']);
+
+        $this->view('admin.support-detail', [
+            'pageTitle'    => 'Conversación #' . $id . ' — PrimeLux Admin',
+            'conversation' => $conversation,
+            'csrfToken'    => $this->csrfToken(),
+            ...$this->getFlash(),
+        ]);
+    }
+
+    // GET /admin/support/:id/messages?since=:lastId — polling JSON para el admin
+    public function getSupportMessages(array $params): void
+    {
+        $this->requireAdmin();
+
+        $id           = (int) ($params['id'] ?? 0);
+        $supportModel = new SupportModel();
+        $conversation = $supportModel->findById($id);
+
+        if (!$conversation) {
+            http_response_code(404);
+            echo json_encode(['error' => 'No encontrado']);
+            exit;
+        }
+
+        // Marca como leídos los mensajes del cliente al hacer polling
+        $supportModel->markAsRead($id, (int) $_SESSION['user_id']);
+
+        $lastId   = (int) ($_GET['since'] ?? 0);
+        $messages = $supportModel->getMessagesSince($id, $lastId);
+        $adminId  = (int) $_SESSION['user_id'];
+
+        $result = array_map(function ($msg) use ($adminId) {
+            return [
+                'id'          => (int) $msg['id'],
+                'message'     => htmlspecialchars($msg['message'], ENT_QUOTES),
+                'sender_name' => htmlspecialchars($msg['sender_name'], ENT_QUOTES),
+                'sender_role' => $msg['sender_role'],
+                'is_own'      => ($msg['sender_role'] === 'admin'),
+                'time'        => date('H:i', strtotime($msg['created_at'])),
+            ];
+        }, $messages);
+
+        header('Content-Type: application/json');
+        echo json_encode(['messages' => $result]);
+        exit;
+    }
+
+    // GET /admin/support/unread — cuenta mensajes no leídos para el badge del admin
+    public function getSupportUnread(array $params): void
+    {
+        if (!$this->isLoggedIn() || ($_SESSION['user_role'] ?? '') !== 'admin') {
+            header('Content-Type: application/json');
+            echo json_encode(['count' => 0]);
+            exit;
+        }
+
+        $supportModel = new SupportModel();
+        $count        = $supportModel->getUnreadCountAdmin();
+
+        header('Content-Type: application/json');
+        echo json_encode(['count' => $count]);
+        exit;
+    }
+
+    // POST /admin/support/:id/message
+    public function replySupport(array $params): void
+    {
+        $this->requireAdmin();
+        $this->validateCsrf();
+
+        $id           = (int) ($params['id'] ?? 0);
+        $supportModel = new SupportModel();
+        $conversation = $supportModel->findById($id);
+
+        if (!$conversation) {
+            $this->redirect(APP_URL . '/admin/support');
+        }
+
+        $message = trim($_POST['message'] ?? '');
+
+        if (empty($message)) {
+            $_SESSION['admin_error'] = 'El mensaje no puede estar vacío.';
+            $this->redirect(APP_URL . '/admin/support/' . $id);
+        }
+
+        $supportModel->addMessage($id, (int) $_SESSION['user_id'], $message);
+
+        // Si es una petición AJAX devuelve JSON con el mensaje recién creado
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            $messages = $supportModel->getMessagesSince($id, 0);
+            $last     = end($messages);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'message' => [
+                    'id'          => (int) $last['id'],
+                    'message'     => htmlspecialchars($last['message'], ENT_QUOTES),
+                    'sender_name' => htmlspecialchars($last['sender_name'], ENT_QUOTES),
+                    'sender_role' => $last['sender_role'],
+                    'is_own'      => true,
+                    'time'        => date('H:i', strtotime($last['created_at'])),
+                ],
+            ]);
+            exit;
+        }
+
+        $this->redirect(APP_URL . '/admin/support/' . $id);
+    }
+
+    // POST /admin/support/:id/status
+    public function updateSupportStatus(array $params): void
+    {
+        $this->requireAdmin();
+        $this->validateCsrf();
+
+        $id      = (int) ($params['id'] ?? 0);
+        $status  = $_POST['status'] ?? '';
+        $allowed = ['open', 'closed'];
+
+        if (!in_array($status, $allowed)) {
+            $this->redirect(APP_URL . '/admin/support');
+        }
+
+        $supportModel = new SupportModel();
+        $supportModel->updateStatus($id, $status);
+
+        $_SESSION['admin_success'] = 'Estado actualizado correctamente.';
+        $this->redirect(APP_URL . '/admin/support/' . $id);
+    }
+
 }

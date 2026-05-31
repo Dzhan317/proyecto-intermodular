@@ -81,10 +81,10 @@ class CategoryModel
         $status = in_array($data['status'] ?? '', ['active', 'inactive']) ? $data['status'] : 'active';
 
         $stmt = $this->db->prepare('
-            INSERT INTO categories (name, slug, status, featured)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO categories (name, slug, description, status, featured)
+            VALUES (?, ?, ?, ?, ?)
         ');
-        $stmt->execute([$data['name'], $slug, $status, $data['featured'] ?? 0]);
+        $stmt->execute([$data['name'], $slug, $data['description'] ?? '', $status, $data['featured'] ?? 0]);
         return (int) $this->db->lastInsertId();
     }
 
@@ -96,30 +96,46 @@ class CategoryModel
 
         $stmt = $this->db->prepare('
             UPDATE categories
-            SET name = ?, slug = ?, status = ?, featured = ?
+            SET name = ?, slug = ?, description = ?, status = ?, featured = ?
             WHERE id = ?
         ');
-        return $stmt->execute([$data['name'], $slug, $status, $data['featured'] ?? 0, $id]);
+        return $stmt->execute([$data['name'], $slug, $data['description'] ?? '', $status, $data['featured'] ?? 0, $id]);
     }
+
+    // ID de la categoría de sistema "Sin categoría" — nunca se puede eliminar
+    private const UNCATEGORIZED_ID = 19;
 
     /**
      * Elimina una categoría por ID.
-     * Solo elimina si no tiene productos asociados — protección de integridad.
+     * Si tiene productos asociados, los reasigna a "Sin categoría" (id=19) antes de borrar.
+     * La categoría "Sin categoría" está protegida y nunca se puede eliminar.
      */
-    public function delete(int $id): bool
+    public function delete(int $id): array
     {
+        // Protección — la categoría "Sin categoría" no se puede eliminar
+        if ($id === self::UNCATEGORIZED_ID) {
+            return ['deleted' => false, 'protected' => true, 'reassigned' => 0];
+        }
+
+        // Cuenta los productos asociados
         $stmt = $this->db->prepare('
             SELECT COUNT(*) FROM product_categories WHERE category_id = ?
         ');
         $stmt->execute([$id]);
         $productCount = (int) $stmt->fetchColumn();
 
+        // Si tiene productos, los reasigna a "Sin categoría"
         if ($productCount > 0) {
-            return false;
+            $this->db->prepare('
+                UPDATE product_categories SET category_id = ? WHERE category_id = ?
+            ')->execute([self::UNCATEGORIZED_ID, $id]);
         }
 
+        // Elimina la categoría
         $stmt = $this->db->prepare('DELETE FROM categories WHERE id = ?');
-        return $stmt->execute([$id]);
+        $stmt->execute([$id]);
+
+        return ['deleted' => true, 'protected' => false, 'reassigned' => $productCount];
     }
 
     /**
