@@ -5,6 +5,8 @@ Diagrama de entidad-relación con todas las tablas del sistema y sus relaciones.
 ```mermaid
 erDiagram
 
+    ── USUARIOS Y SEGURIDAD ──────────────────────────────────────────────
+
     users {
         int         id              PK
         varchar     name
@@ -16,6 +18,7 @@ erDiagram
         datetime    created_at
         datetime    updated_at
     }
+
     login_attempts {
         int         id              PK
         varchar     email
@@ -23,6 +26,7 @@ erDiagram
         boolean     success
         datetime    created_at
     }
+
     password_resets {
         int         id              PK
         varchar     email
@@ -31,6 +35,7 @@ erDiagram
         boolean     used
         datetime    created_at
     }
+
     two_factor_codes {
         int         id              PK
         int         user_id         FK
@@ -42,6 +47,7 @@ erDiagram
         varchar     request_ip
         datetime    created_at
     }
+
     addresses {
         int         id              PK
         int         user_id         FK
@@ -53,6 +59,9 @@ erDiagram
         varchar     phone
         boolean     is_default
     }
+
+    ── CATÁLOGO ──────────────────────────────────────────────────────────
+
     categories {
         int         id              PK
         varchar     name
@@ -60,22 +69,28 @@ erDiagram
         text        description
         int         parent_id       FK
         enum        status
+        boolean     featured
         datetime    created_at
     }
+
     products {
         int         id              PK
         varchar     name
+        varchar     brand
         varchar     slug            UK
         text        description
         decimal     base_price
+        decimal     cost_price
         enum        status
         datetime    created_at
         datetime    updated_at
     }
+
     product_categories {
         int         product_id      FK
         int         category_id     FK
     }
+
     variants {
         int         id              PK
         int         product_id      FK
@@ -83,12 +98,16 @@ erDiagram
         decimal     extra_price
         int         stock
     }
+
     product_images {
         int         id              PK
         int         product_id      FK
         varchar     image_url
         boolean     is_main
     }
+
+    ── CARRITO Y PEDIDOS ─────────────────────────────────────────────────
+
     carts {
         bigint      id              PK
         int         user_id         FK
@@ -96,12 +115,14 @@ erDiagram
         datetime    created_at
         datetime    updated_at
     }
+
     cart_items {
         bigint      id              PK
         bigint      cart_id         FK
         int         variant_id      FK
         int         quantity
     }
+
     orders {
         int         id              PK
         int         user_id         FK
@@ -109,9 +130,16 @@ erDiagram
         enum        shipping_type
         decimal     shipping_cost
         decimal     total
+        varchar     street
+        varchar     city
+        varchar     province
+        varchar     postal_code
+        varchar     country
+        varchar     phone
         varchar     stripe_session_id
         datetime    created_at
     }
+
     order_items {
         bigint      id              PK
         int         order_id        FK
@@ -121,6 +149,7 @@ erDiagram
         decimal     unit_price
         decimal     subtotal
     }
+
     payments {
         bigint      id              PK
         int         order_id        FK
@@ -132,6 +161,9 @@ erDiagram
         varchar     currency
         datetime    paid_at
     }
+
+    ── RECOMENDACIONES ───────────────────────────────────────────────────
+
     interactions {
         bigint      id              PK
         int         user_id         FK
@@ -139,18 +171,21 @@ erDiagram
         enum        type
         datetime    created_at
     }
+
     view_history {
         bigint      id              PK
         int         user_id         FK
         int         product_id      FK
         datetime    created_at
     }
+
     user_interests {
         int         user_id         FK
         int         category_id     FK
         int         interest_score
         timestamp   last_interaction
     }
+
     reviews {
         int         id              PK
         int         user_id         FK
@@ -159,6 +194,9 @@ erDiagram
         text        comment
         datetime    created_at
     }
+
+    ── SOPORTE ───────────────────────────────────────────────────────────
+
     conversations {
         int         id              PK
         int         user_id         FK
@@ -166,6 +204,7 @@ erDiagram
         enum        status
         datetime    created_at
     }
+
     messages {
         bigint      id              PK
         int         conversation_id FK
@@ -174,6 +213,8 @@ erDiagram
         boolean     is_read
         datetime    created_at
     }
+
+    ── RELACIONES ────────────────────────────────────────────────────────
 
     users            ||--o{ two_factor_codes   : "genera"
     users            ||--o{ addresses          : "tiene"
@@ -185,31 +226,37 @@ erDiagram
     users            ||--o{ reviews            : "escribe"
     users            ||--o{ conversations      : "abre"
     users            ||--o{ messages           : "envía"
+
     categories       ||--o{ categories         : "subcategoría de"
     categories       ||--o{ product_categories : "agrupa"
     categories       ||--o{ user_interests     : "interesa a"
+
     products         ||--o{ product_categories : "pertenece a"
     products         ||--o{ variants           : "tiene"
     products         ||--o{ product_images     : "tiene"
     products         ||--o{ interactions       : "recibe"
     products         ||--o{ view_history       : "aparece en"
     products         ||--o{ reviews            : "recibe"
+
     variants         ||--o{ cart_items         : "añadido en"
     variants         ||--o{ order_items        : "comprado en"
+
     carts            ||--o{ cart_items         : "contiene"
+
     orders           ||--o{ order_items        : "contiene"
     orders           ||--|| payments           : "liquidado en"
+
     conversations    ||--o{ messages           : "contiene"
 ```
 
 ## Notas del modelo
 
-**21 tablas** organizadas en 4 bloques: usuarios y seguridad (5), catálogo (5), carrito y pedidos (5), recomendaciones y soporte (6).
+**Snapshots en pedidos** — `order_items` guarda `product_name_snapshot`, `unit_price` y `subtotal` como copia en el momento de la compra. Si un producto cambia de precio o se elimina, el historial de pedidos no se ve afectado.
 
-**Snapshots en pedidos** — `order_items` guarda nombre, precio unitario y subtotal en el momento de la compra. Si un producto cambia o se elimina, el historial no se ve afectado.
+**Variantes como unidad de stock** — el stock no se gestiona en `products` sino en `variants`. Todo producto tiene al menos una variante, incluso si no tiene opciones configurables.
 
-**Variantes como unidad de stock** — el stock se gestiona en `variants`, no en `products`.
+**Subcategorías** — `categories.parent_id` apunta a la misma tabla, permitiendo una jerarquía de categorías sin límite de profundidad.
 
-**Subcategorías** — `categories.parent_id` permite jerarquía sin límite de profundidad.
+**Tabla `reviews`** — creada en el schema pero sin implementación de interfaz todavía. Ver `docs/decisions/001-reviews-deferred.md`.
 
-**Tabla `reviews`** — creada en el schema, sin implementación de interfaz todavía. Ver `docs/decisions/001-reviews-deferred.md`.
+**Motor de recomendación** — `interactions`, `view_history` y `user_interests` alimentan el motor. `user_interests` actúa como tabla de afinidad usuario-categoría con puntuación acumulada.

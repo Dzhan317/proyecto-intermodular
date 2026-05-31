@@ -73,8 +73,8 @@ addresses    → dirección del usuario (is_default=1 para la última usada)
 
 | Tipo          | Descripción         | Coste  |
 |---------------|---------------------|--------|
-| standard      | 3-5 días hábiles    | Gratis |
-| express       | 24-48 horas         | 4,99 € |
+| standard      | 2-4 días laborables | Gratis |
+| express       | 24 horas            | 4,99 € |
 | pickup_point  | Recogida en tienda  | Gratis |
 
 ---

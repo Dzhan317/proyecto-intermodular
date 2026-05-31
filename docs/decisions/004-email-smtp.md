@@ -34,20 +34,19 @@ Se descartó PHPMailer (la alternativa habitual) por tres razones:
 
 ## Cómo funciona la conexión
 
-1. `fsockopen` abre conexión SSL directa a `smtp.ionos.es:465`
+1. `stream_socket_client` abre conexión TCP a `smtp.ionos.es:587`
 2. `EHLO` anuncia el cliente al servidor
-3. `AUTH LOGIN` autentica con `admin@primeluxshop.es`
-4. `MAIL FROM` declara el remitente visible (`no-reply@primeluxshop.es`)
-5. `RCPT TO` → `DATA` → mensaje → `QUIT`
-
-Se usa puerto 465 con SSL directo en lugar de 587/STARTTLS porque resultó más estable en IONOS shared hosting durante las pruebas.
+3. `STARTTLS` eleva la conexión a TLS cifrado
+4. `AUTH LOGIN` autentica con `admin@primeluxshop.es`
+5. `MAIL FROM` declara el remitente visible (`no-reply@primeluxshop.es`)
+6. `RCPT TO` → `DATA` → mensaje → `QUIT`
 
 ---
 
 ## Fallback si IONOS rechaza el FROM del alias
 
 Si el servidor devuelve error 550 al declarar `no-reply@primeluxshop.es` como remitente,
-cambiar en `config.php`:
+la solución es cambiar en `config.php`:
 
 ```php
 define('MAIL_NOREPLY_ADDRESS', 'admin@primeluxshop.es');

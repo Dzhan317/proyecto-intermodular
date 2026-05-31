@@ -91,7 +91,7 @@ Para este proyecto se descartó por las siguientes razones:
 - El flujo con `Session::retrieve()` es suficiente para la demo y el MVP
 - El hosting compartido de IONOS no garantiza la recepción fiable de webhooks
 - Añadir webhook requería `STRIPE_WEBHOOK_SECRET`, endpoint dedicado y
-  validación de firma — complejidad innecesaria dentro del límite de 64 horas
+  validación de firma — complejidad innecesaria para el alcance de este proyecto
 - El riesgo de pedido creado sin pago real es inexistente: la URL de éxito incluye un `session_id` generado por Stripe que se verifica con
   `Session::retrieve()` antes de crear el pedido. Un `session_id` no puede fabricarse — si el pago no fue completado, Stripe no lo genera.
   

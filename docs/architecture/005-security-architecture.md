@@ -68,11 +68,8 @@ un mensaje de error — nunca se procesa la petición.
 
 ---
 
-## Gestión de sesión
-
 ### Sesión por inactividad
-En lugar de un tiempo fijo desde el login, la sesión expira por
-inactividad. Cada petición autenticada actualiza `$_SESSION['last_activity']`.
+En lugar de un tiempo fijo desde el login, la sesión expira por inactividad. Cada petición autenticada actualiza `$_SESSION['last_activity']`.
 
 | Rol | Límite de inactividad |
 |---|---|
@@ -90,36 +87,28 @@ session_set_cookie_params([
 ]);
 ```
 
-`httponly` impide que JavaScript acceda a la cookie de sesión, bloqueando
-ataques XSS que intenten robarla. `secure` garantiza que la cookie solo
-se transmite por HTTPS.
+`httponly` impide que JavaScript acceda a la cookie de sesión, bloqueando ataques XSS que intenten robarla. `secure` garantiza que la cookie solo se transmite por HTTPS.
 
 ---
 
 ## Comunicaciones cifradas
 
-El dominio `primeluxshop.es` tiene SSL habilitado mediante el panel de
-IONOS. Todas las comunicaciones entre el cliente y el servidor usan HTTPS.
+El dominio `primeluxshop.es` tiene SSL habilitado mediante el panel de IONOS. Todas las comunicaciones entre el cliente y el servidor usan HTTPS.
 
-Las peticiones HTTP son redirigidas automáticamente a HTTPS mediante
-el `.htaccess`.
+Las peticiones HTTP son redirigidas automáticamente a HTTPS mediante el `.htaccess`.
 
 ---
 
 ## Protección de datos sensibles
 
 ### config.php excluido de GitHub
-El fichero `config/config.php` contiene credenciales de BD y claves de
-API de Stripe. Está incluido en `.gitignore` y nunca se sube al repositorio.
+El fichero `config/config.php` contiene credenciales de BD y claves de API de Stripe. Está incluido en `.gitignore` y nunca se sube al repositorio.
 
 ### Datos de tarjeta
-Los datos de tarjeta de crédito nunca pasan por el servidor de la
-aplicación. Stripe Checkout gestiona el pago en sus propios servidores —
-la aplicación solo recibe el `session_id` para verificar el resultado.
+Los datos de tarjeta de crédito nunca pasan por el servidor de la aplicación. Stripe Checkout gestiona el pago en sus propios servidores — la aplicación solo recibe el `session_id` para verificar el resultado.
 
 ### Prepared statements
-Todas las consultas a la BD usan PDO con prepared statements, eliminando
-el riesgo de inyección SQL.
+Todas las consultas a la BD usan PDO con prepared statements, eliminando el riesgo de inyección SQL.
 
 ```php
 $stmt = $this->db->prepare('SELECT * FROM users WHERE email = ?');
@@ -130,9 +119,6 @@ $stmt->execute([$email]);
 
 ## Seguridad en el panel admin
 
-El vendor de Stripe (`public/vendor/`) está excluido del repositorio
-mediante `.gitignore` — son archivos de terceros que no deben versionarse.
+El vendor de Stripe (`public/vendor/`) está excluido del repositorio mediante `.gitignore` — son archivos de terceros que no deben versionarse.
 
-Los datos sensibles mostrados en el panel (precios de coste, datos de
-usuarios, pedidos) solo son accesibles para usuarios con rol `admin`,
-verificado en cada petición mediante `requireAdmin()`.
+Los datos sensibles mostrados en el panel (precios de coste, datos de usuarios, pedidos) solo son accesibles para usuarios con rol `admin`, verificado en cada petición mediante `requireAdmin()`.

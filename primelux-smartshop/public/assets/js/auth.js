@@ -10,18 +10,17 @@
 function initPasswordToggle(inputId, buttonId, iconId) {
     var input  = document.getElementById(inputId);
     var button = document.getElementById(buttonId);
-    var icon   = document.getElementById(iconId);
+    var iconShow = document.getElementById(iconId);
+    var iconHide = document.getElementById(iconId + 'Hide');
 
-    if (!input || !button || !icon) return;
-
-    var iconShow = window.APP_URL + '/assets/img/icons/ojo.svg';
-    var iconHide = window.APP_URL + '/assets/img/icons/ojos-cruzados.svg';
+    if (!input || !button || !iconShow) return;
 
     button.addEventListener('click', function () {
         var isHidden = input.type === 'password';
-        input.type   = isHidden ? 'text' : 'password';
-        icon.src     = isHidden ? iconHide : iconShow;
-        icon.alt     = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
+        input.type = isHidden ? 'text' : 'password';
+        // Alterna entre los dos SVGs inline
+        iconShow.classList.toggle('hidden', isHidden);
+        if (iconHide) iconHide.classList.toggle('hidden', !isHidden);
     });
 }
 

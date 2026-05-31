@@ -15,13 +15,19 @@ if (!file_exists(CONFIG_PATH . '/config.php')) {
 require_once CONFIG_PATH . '/config.php';
 
 if (session_status() === PHP_SESSION_NONE) {
+    // Fuerza el tiempo de vida de la sesión en servidor.
+    // Necesario en hostings compartidos (IONOS) donde gc_maxlifetime
+    // puede ser muy bajo e ignorar SESSION_LIFETIME.
+    ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+    ini_set('session.cookie_lifetime', (string) SESSION_LIFETIME);
+
     session_name(SESSION_NAME);
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
         'path'     => '/',
         'secure'   => (APP_ENV === 'production'),
         'httponly' => true,
-        'samesite' => 'Lax',
+        'samesite' => 'Lax',    // Lax permite redirecciones GET externas (necesario para Stripe)
     ]);
     session_start();
 }
@@ -61,3 +67,4 @@ try {
         }
     }
 }
+

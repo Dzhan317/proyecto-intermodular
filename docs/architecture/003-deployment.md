@@ -24,13 +24,13 @@
     └── assets/
 ```
 
-El dominio `primeluxshop.es` apunta directamente a `/public`. Las carpetas `app/`, `config/` y `logs/` son inaccesibles desde el navegador.
+El dominio `primeluxshop.es` apunta directamente a `/public`. Las carpetas `app/` y `config/` son inaccesibles desde el navegador.
 
 ---
 
 ## Cómo se despliega
 
-El despliegue es manual mediante el explorador de archivos del panel de IONOS o por FTP/SFTP.
+El despliegue es manual mediante FTP/SFTP, utilizando Filezilla.
 
 **Datos de conexión SFTP:**
 - Host: `access-5020169311.webspace-host.com`
@@ -63,7 +63,7 @@ Toda la configuración vive en `config/config.php`. Este archivo define:
 - Claves de Stripe (Fase 6)
 - Entorno (`APP_ENV`: `development` o `production`)
 
-En producción, `APP_ENV = 'production'` desactiva la visualización de errores y los redirige al archivo `logs/error.log`.
+En producción, `APP_ENV = 'production'` desactiva la visualización de errores.
 
 ---
 
