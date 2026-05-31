@@ -98,12 +98,25 @@ ya se realizó mediante Stripe en el momento del pago. Solo `pending` y
 Las categorías sí se eliminan físicamente (`DELETE`), a diferencia de los
 productos, porque no tienen referencias directas en `order_items`.
 
-Antes de eliminar se comprueba que no tenga productos asociados en
-`product_categories`. Si los tiene, `delete()` devuelve `false` y el
-controlador muestra un error al administrador.
+Al eliminar una categoría que tiene productos asociados, el sistema los
+reasigna automáticamente a la categoría especial **"Sin categoría"** (id fijo
+en `CategoryModel::UNCATEGORIZED_ID`) antes de borrar. Esto garantiza que
+ningún producto queda huérfano y el admin puede reasignarlos manualmente
+cuando quiera.
+
+La categoría "Sin categoría" está **protegida** — `delete()` devuelve
+`['deleted' => false, 'protected' => true]` si se intenta eliminar, y el
+controlador muestra un mensaje de error informativo. Se mantiene siempre
+inactiva para que no aparezca en la tienda pública.
+
+`delete()` devuelve un array con tres claves: `deleted`, `protected` y
+`reassigned` (número de productos reasignados). El controlador usa estos
+valores para mostrar el mensaje adecuado en cada caso.
 
 El slug de categoría también se genera automáticamente con el mismo mecanismo
 de exclusión por ID que los productos.
+
+> Ver `docs/decisions/026-uncategorized-category.md` para el detalle completo.
 
 ---
 
@@ -116,3 +129,27 @@ de pedidos.
 Protecciones implementadas:
 - Un admin no puede modificar su propio estado
 - Solo existen dos roles: `admin` y `customer`
+
+
+## Dashboard — actualización
+
+El contador de productos muestra ahora **activos / total** en lugar de solo los activos. Esto permite al administrador ver de un vistazo cuántos productos están activos frente al total incluyendo inactivos.
+
+```
+$totalProducts = COUNT(*) WHERE status = 'active'   // activos
+$allProducts   = COUNT(*)                            // todos
+```
+
+La vista muestra: `X / Y` donde X = activos e Y = total.
+El contador de clientes sigue el mismo patrón, añadiendo además el desglose de usuarios bloqueados:
+
+
+```
+$activeUsers  = COUNT(*) WHERE role = 'customer' AND status = 'active'
+$totalUsers   = COUNT(*) WHERE role = 'customer'
+$blockedUsers = $totalUsers - $activeUsers
+```
+
+La vista muestra: `X / Y` donde X = clientes activos e Y = total de clientes,
+con un subtexto en rojo "N bloqueados" que solo aparece si hay alguno.
+El administrador (rol `admin`) no se contabiliza en ninguno de los tres valores.

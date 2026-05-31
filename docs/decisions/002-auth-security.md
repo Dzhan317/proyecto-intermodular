@@ -48,10 +48,10 @@ Cada token tiene el campo `used` que se marca como verdadero tras su primer uso,
 
 Se exigen los siguientes criterios mínimos en el registro y al restablecer contraseña:
 
-- Mínimo 10 caracteres
-- Al menos 2 letras mayúsculas
-- Al menos 2 letras minúsculas
-- Al menos 2 números
+- Mínimo 12 caracteres
+- Al menos 1 letra mayúscula
+- Al menos 1 letra minúscula
+- Al menos 1 número
 - Al menos 1 carácter especial
 
 Estos criterios se validan tanto en el frontend (indicador visual en tiempo real) como en el backend (antes de guardar en base de datos). La validación frontend es orientativa; la del backend es la que tiene valor de seguridad real.

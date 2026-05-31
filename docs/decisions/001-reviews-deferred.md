@@ -6,7 +6,7 @@ En los diseños originales del proyecto se contempló una pantalla de reseñas q
 
 ## Por qué no se implementa en el MVP
 
-El alcance del proyecto está acotado a 64 horas de desarrollo con 9 fases definidas. Implementar las reseñas correctamente requiere:
+El proyecto tiene 9 fases definidas. Implementar las reseñas correctamente requiere:
 
 - Pantalla de reseña en el detalle de producto
 - Restricción: solo pueden reseñar usuarios que hayan comprado ese producto
@@ -18,7 +18,8 @@ Ese trabajo se estima en 5-8 horas que comprometen la entrega de fases con mayor
 
 ## Estado actual
 
-La tabla `reviews` está creada en el schema desde la Fase 0 para no tener que modificar la base de datos si se implementa en el futuro. El código de aplicación no la utiliza todavía.
+La tabla `reviews` está creada en el schema desde la Fase 0 para no tener que modificar la base de datos si se implementa en el futuro.
+El código de aplicación no la utiliza todavía.
 
 ## Condición para implementarla
 
