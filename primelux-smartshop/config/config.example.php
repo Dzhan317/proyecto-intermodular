@@ -7,7 +7,7 @@
  */
 
 // Rutas
-define('ROOT_PATH',   dirname(__DIR__));
+define('ROOT_PATH',   dirname(__DIR__ . '/..'));
 define('APP_PATH',    ROOT_PATH . '/app');
 define('CONFIG_PATH', ROOT_PATH . '/config');
 define('VIEW_PATH',   APP_PATH  . '/Views/');
@@ -27,7 +27,7 @@ define('DB_CHARSET', 'utf8mb4');
 
 // Sesión
 define('SESSION_NAME',     'primelux_session');
-define('SESSION_LIFETIME', 3600);
+define('SESSION_LIFETIME', 604800);
 
 // Seguridad
 define('CSRF_TOKEN_NAME',        'csrf_token');

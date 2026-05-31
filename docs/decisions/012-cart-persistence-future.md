@@ -14,7 +14,7 @@ $_SESSION['cart'] = [
             'name'       => 'RAM Kingston Fury 16GB DDR4',
             'price'      => 49.99,
             'quantity'   => 2,
-            'image_url'  => '/assets/img/products/componentes/ram-kingston-fury-ddr4.webp',
+            'image_url'  => '/assets/img/products/components/ram-kingston-fury-16gb-ddr4.webp',
             'slug'       => 'ram-kingston-fury-16gb-ddr4',
         ],
     ]
@@ -46,7 +46,6 @@ CREATE TABLE cart_items (
     cart_id    INT UNSIGNED NOT NULL,
     variant_id INT UNSIGNED NOT NULL,
     quantity   SMALLINT UNSIGNED NOT NULL DEFAULT 1,
-    unit_price DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cart_id)    REFERENCES carts(id)    ON DELETE CASCADE,
     FOREIGN KEY (variant_id) REFERENCES variants(id) ON DELETE CASCADE

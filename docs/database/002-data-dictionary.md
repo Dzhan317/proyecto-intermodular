@@ -60,7 +60,7 @@ Códigos de verificación 2FA enviados por email al iniciar sesión.
 | id              | INT UNSIGNED    | Identificador único                          |
 | user_id         | INT UNSIGNED FK | Usuario al que pertenece el código           |
 | code_hash       | CHAR(64)        | SHA-256 del código (nunca en claro)          |
-| expires_at      | DATETIME        | Expiración (15 minutos desde la creación)    |
+| expires_at      | DATETIME        | Expiración (10 minutos desde la creación)    |
 | used_at         | DATETIME        | Cuándo fue verificado                        |
 | failed_attempts | TINYINT         | Intentos fallidos de verificación            |
 | blocked_until   | DATETIME        | Bloqueo temporal si se superan los intentos  |
@@ -91,15 +91,16 @@ Direcciones de envío guardadas por el usuario.
 
 Categorías del catálogo. Soporta subcategorías mediante parent_id.
 
-| Columna     | Tipo         | Descripción                                   |
-|-------------|--------------|-----------------------------------------------|
-| id          | INT UNSIGNED | Identificador único                           |
-| name        | VARCHAR(100) | Nombre visible                                |
-| slug        | VARCHAR(100) | URL amigable (ej: electronica)                |
-| description | TEXT         | Descripción opcional                          |
-| parent_id   | INT FK       | Categoría padre (NULL si es de primer nivel)  |
-| status      | ENUM         | active / inactive                             |
-| created_at  | DATETIME     | Fecha de creación                             |
+| Columna     | Tipo         | Descripción                                                        |
+|-------------|--------------|--------------------------------------------------------------------|
+| id          | INT UNSIGNED | Identificador único                                                |
+| name        | VARCHAR(100) | Nombre visible                                                     |
+| slug        | VARCHAR(100) | URL amigable (ej: electronica)                                     |
+| description | TEXT         | Descripción opcional                                               |
+| parent_id   | INT FK       | Categoría padre (NULL si es de primer nivel)                       |
+| status      | ENUM         | active / inactive                                                  |
+| featured    | BOOLEAN      | Si aparece destacada en la home (añadida en migración 007)         |
+| created_at  | DATETIME     | Fecha de creación                                                  |
 
 ---
 
@@ -107,16 +108,18 @@ Categorías del catálogo. Soporta subcategorías mediante parent_id.
 
 Productos del catálogo.
 
-| Columna     | Tipo           | Descripción                              |
-|-------------|----------------|------------------------------------------|
-| id          | INT UNSIGNED   | Identificador único                      |
-| name        | VARCHAR(150)   | Nombre del producto                      |
-| slug        | VARCHAR(150)   | URL amigable                             |
-| description | TEXT           | Descripción larga                        |
-| base_price  | DECIMAL(10,2)  | Precio base sin variantes                |
-| status      | ENUM           | active / inactive                        |
-| created_at  | DATETIME       | Fecha de alta                            |
-| updated_at  | DATETIME       | Última modificación                      |
+| Columna     | Tipo           | Descripción                                              |
+|-------------|----------------|----------------------------------------------------------|
+| id          | INT UNSIGNED   | Identificador único                                      |
+| name        | VARCHAR(150)   | Nombre del producto                                      |
+| brand       | VARCHAR(100)   | Marca del producto (añadida en migración 005)            |
+| slug        | VARCHAR(150)   | URL amigable                                             |
+| description | TEXT           | Descripción larga                                        |
+| base_price  | DECIMAL(10,2)  | Precio de venta al público                               |
+| cost_price  | DECIMAL(10,2)  | Precio de coste — solo visible en el admin (migración 006)|
+| status      | ENUM           | active / inactive                                        |
+| created_at  | DATETIME       | Fecha de alta                                            |
+| updated_at  | DATETIME       | Última modificación                                      |
 
 ---
 

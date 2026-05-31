@@ -70,10 +70,16 @@ var NavProgress = (function () {
 var Prefetcher = (function () {
     var prefetched = new Set();
 
+    // Rutas que nunca deben precargarse — logout destruiría la sesión, admin puede tener efectos no deseados
+    var PREFETCH_BLACKLIST = ['/logout', '/admin'];
+
     function prefetch(href) {
         if (!href || prefetched.has(href)) return;
         if (!href.startsWith(window.location.origin)) return;
         if (href.includes('#')) return;
+        // Excluir rutas de la blacklist
+        var path = href.replace(window.location.origin, '');
+        if (PREFETCH_BLACKLIST.some(function(blocked) { return path === blocked || path.startsWith(blocked + '/'); })) return;
 
         prefetched.add(href);
 
@@ -136,8 +142,9 @@ document.addEventListener('DOMContentLoaded', function () {
         NavProgress.start();
     });
 
-    // Prefetch al cargar + prefetch por hover
-    Prefetcher.prefetchNavCategories();
+    // Prefetch por hover únicamente — prefetchNavCategories() eliminado
+    // porque lanzaba N peticiones PHP paralelas al cargar (una por categoría),
+    // saturando el hosting compartido y causando LCP > 30s
     Prefetcher.initHoverPrefetch();
 });
 

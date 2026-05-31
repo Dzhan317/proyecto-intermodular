@@ -4,7 +4,7 @@
 
 Se eligió el patrón Modelo-Vista-Controlador porque separa de forma clara tres responsabilidades que en un e-commerce crecen de forma independiente: la lógica de negocio, el acceso a datos y la presentación al usuario. Esto permite trabajar en el panel de administración sin tocar las vistas del cliente, o cambiar una consulta SQL sin afectar al HTML.
 
-Se descartaron los frameworks PHP más populares (Laravel, Symfony) por dos motivos concretos: el límite de 64 horas de desarrollo no justifica la curva de aprendizaje de un framework completo, y el hosting compartido de IONOS no tiene restricciones que los requieran. Un MVC ligero propio cubre exactamente lo que el proyecto necesita sin dependencias externas.
+Se descartaron los frameworks PHP más populares (Laravel, Symfony) porque el hosting compartido de IONOS no tiene restricciones que los requieran, y un MVC ligero propio cubre exactamente lo que el proyecto necesita sin dependencias externas.
 
 ---
 
@@ -28,7 +28,6 @@ primelux-smartshop/
 │   ├── Controllers/     Reciben la petición y coordinan la respuesta
 │   ├── Models/          Consultas a la base de datos
 │   ├── Services/        Lógica de negocio compleja
-│   ├── Helpers/         Funciones de utilidad reutilizables
 │   ├── Views/           Plantillas HTML organizadas por sección
 │   └── routes.php       Mapa completo de URLs de la aplicación
 │

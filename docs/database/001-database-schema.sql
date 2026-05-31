@@ -1,12 +1,8 @@
--- Esquema completo de la base de datos.
--- Organizado en 4 bloques: usuarios y seguridad, catálogo, carrito y pedidos,
--- recomendaciones y soporte.
-
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ------------------------------------------------------------
--- BLOQUE 1: USUARIOS Y SEGURIDAD
+-- BLOCK 1: USERS & SECURITY
 -- ------------------------------------------------------------
 
 CREATE TABLE users (
@@ -74,7 +70,7 @@ CREATE TABLE addresses (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- BLOQUE 2: CATÁLOGO
+-- BLOCK 2: CATALOGUE
 -- ------------------------------------------------------------
 
 CREATE TABLE categories (
@@ -129,7 +125,7 @@ CREATE TABLE product_images (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- BLOQUE 3: CARRITO Y PEDIDOS
+-- BLOCK 3: CART & ORDERS
 -- ------------------------------------------------------------
 
 CREATE TABLE carts (
@@ -199,7 +195,7 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- BLOQUE 4: RECOMENDACIONES Y SOPORTE
+-- BLOCK 4: RECOMMENDATIONS & SUPPORT
 -- ------------------------------------------------------------
 
 CREATE TABLE interactions (
@@ -233,7 +229,7 @@ CREATE TABLE user_interests (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla creada. La pantalla de reseñas se ha dejado para una fase posterior.
+-- Table created, UI implementation deferred (see docs/decisions)
 CREATE TABLE reviews (
     id          INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
     user_id     INT UNSIGNED  NOT NULL,

@@ -24,6 +24,12 @@ Motor relacional incluido en el plan de hosting de IONOS sin coste adicional. La
 
 Tailwind permite construir interfaces directamente en el HTML sin cambiar de contexto entre archivos. La versión CDN elimina el paso de compilación, lo que es suficiente para un proyecto de este tamaño y ahorra tiempo de configuración de herramientas de build.
 
+El CDN se carga desde los layouts de vistas (`main.php`, `auth.php`, `checkout.php`) mediante:
+
+```
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
 Los estilos que Tailwind no puede gestionar (variables CSS del sistema de diseño, autofill de inputs, scrollbar) se gestionan en `public/assets/css/app.css`.
 
 **Alternativas descartadas:** Bootstrap impone demasiada estructura visual predefinida que contradice el sistema de diseño propio del proyecto. Compilar Tailwind con npm añadiría un paso de build que complica el despliegue en IONOS.
@@ -32,7 +38,7 @@ Los estilos que Tailwind no puede gestionar (variables CSS del sistema de diseñ
 
 ## JavaScript vanilla ES6 (frontend)
 
-No se usa ningún framework de frontend porque las interacciones de la aplicación son sencillas: toggles, validación de formularios, indicadores visuales. Añadir React o Vue para esto sería sobreingenieería. El código JS está organizado en módulos por sección (`auth.js`, etc.) dentro de `public/assets/js/`.
+No se usa ningún framework de frontend porque las interacciones de la aplicación son sencillas: toggles, validación de formularios, indicadores visuales. Añadir React o Vue para esto sería sobreingeniería. El código JS está organizado en módulos por sección (`auth.js`, etc.) dentro de `public/assets/js/`.
 
 ---
 
@@ -46,7 +52,7 @@ Stripe Checkout delega toda la pantalla de pago a Stripe, lo que significa que l
 
 ## IONOS Hosting Compartido (infraestructura)
 
-El dominio principal `primeluxshop.es` y el hosting están contratados en IONOS. El dominio `primeluxmarket.com` actúa como redirección hacia el dominio principal y no aloja ningún archivo ni dato sensible. El plan incluye PHP 8.4, MySQL 8, SMTP y certificado SSL. El despliegue es por FTP o el explorador de archivos del panel.
+El dominio principal `primeluxshop.es` y el hosting están contratados en IONOS. El dominio `primeluxmarket.com` actúa como redirección hacia el dominio principal y no aloja ningún archivo ni dato sensible. El plan incluye PHP 8.4, MySQL 8, SMTP y certificado SSL. El despliegue es por FTP (filezilla).
 
 El directorio raíz del dominio apunta a `/public`, lo que garantiza que `app/` y `config/` (con las credenciales) son inaccesibles desde el navegador.
 
