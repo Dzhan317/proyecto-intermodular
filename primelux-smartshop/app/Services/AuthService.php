@@ -106,6 +106,22 @@ class AuthService
         );
     }
 
+    /**
+     * Valida si un token de reset existe, no ha sido usado y no ha expirado.
+     * Se usa en resetPasswordForm() para mostrar el error antes de renderizar el formulario.
+     */
+    public function isValidResetToken(string $token): bool
+    {
+        $tokenHash = hash('sha256', $token);
+        $stmt = $this->db->prepare('
+            SELECT id FROM password_resets
+            WHERE token_hash = ? AND used = 0 AND expires_at > NOW()
+            LIMIT 1
+        ');
+        $stmt->execute([$tokenHash]);
+        return (bool) $stmt->fetch();
+    }
+
     public function resetPassword(string $token, string $password, string $confirm): array
     {
         if ($password !== $confirm) {
@@ -236,16 +252,20 @@ HTML;
         return $this->validatePasswordStrength($data['password']);
     }
 
+    // Reglas NIST 2025 — longitud como factor principal, 1 de cada tipo.
+    // Si cambias estos valores, actualiza también:
+    //   - PASSWORD_RULES en public/assets/js/auth.js
+    //   - app/Views/auth/partials/password-requirements.php
     private function validatePasswordStrength(string $password): string
     {
-        if (strlen($password) < 10)
-            return 'La contraseña debe tener al menos 10 caracteres.';
-        if (strlen(preg_replace('/[^A-Z]/', '', $password)) < 2)
-            return 'La contraseña debe contener al menos 2 mayúsculas.';
-        if (strlen(preg_replace('/[^a-z]/', '', $password)) < 2)
-            return 'La contraseña debe contener al menos 2 minúsculas.';
-        if (strlen(preg_replace('/[^0-9]/', '', $password)) < 2)
-            return 'La contraseña debe contener al menos 2 números.';
+        if (strlen($password) < 12)
+            return 'La contraseña debe tener al menos 12 caracteres.';
+        if (!preg_match('/[A-Z]/', $password))
+            return 'La contraseña debe contener al menos 1 mayúscula.';
+        if (!preg_match('/[a-z]/', $password))
+            return 'La contraseña debe contener al menos 1 minúscula.';
+        if (!preg_match('/[0-9]/', $password))
+            return 'La contraseña debe contener al menos 1 número.';
         if (!preg_match('/[^A-Za-z0-9]/', $password))
             return 'La contraseña debe contener al menos 1 carácter especial.';
         return '';

@@ -219,10 +219,10 @@ $currentMax = (int) ceil($maxPrice);
                     Ningún producto coincide con los filtros aplicados.<br>
                     Prueba a ampliar el rango de precio o quita algún filtro.
                 </p>
-                <a href="<?= $baseUrl ?>"
+                <a href="<?= $totalInCategory === 0 ? APP_URL . '/' : $baseUrl ?>"
                    class="inline-block bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-[var(--color-text-primary)]
                           font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
-                    Ver todos los productos
+                    <?= $totalInCategory === 0 ? 'Volver a la tienda' : 'Ver todos los productos' ?>
                 </a>
             </div>
 

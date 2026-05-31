@@ -1,8 +1,7 @@
 <?php
 /*
  * Admin — Listado de usuarios.
- * Permite buscar, cambiar estado (activo/bloqueado) y cambiar rol.
- * Solo el superadmin (ID=1) puede cambiar roles.
+ * Permite buscar y cambiar estado (activo/bloqueado) de los usuarios.
  * Nadie puede modificar al superadmin.
  */
 ob_start();
@@ -17,7 +16,7 @@ $totalPages   = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
         <form method="GET" action="<?= APP_URL ?>/admin/users" class="flex-1 max-w-sm">
             <div class="relative">
                 <input type="text" name="q" value="<?= htmlspecialchars($search) ?>"
-                    placeholder="Buscar por nombre o email..."
+                    placeholder="Buscar por nombre o email... (Enter para buscar)"
                     class="w-full bg-[var(--color-bg-card)] text-[var(--color-text-primary)]
                               placeholder-[var(--color-text-muted)] border border-[var(--color-border)]
                               rounded-xl pl-4 pr-10 py-2.5 text-sm focus:outline-none
@@ -113,7 +112,7 @@ $totalPages   = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
 
                                         <?php else: ?>
 
-                                            <!-- Cambiar estado — todos los admins pueden -->
+                                            <!-- Cambiar estado -->
                                             <form method="POST"
                                                 action="<?= APP_URL ?>/admin/users/<?= (int) $u['id'] ?>"
                                                 onsubmit="return confirm('¿Cambiar el estado de este usuario?')">

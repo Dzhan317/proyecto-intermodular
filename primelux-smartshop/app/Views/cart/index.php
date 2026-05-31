@@ -218,14 +218,16 @@ $itemCount    = $totals['item_count']    ?? 0;
                 <div class="px-6 py-5">
                     <dl class="space-y-3 mb-5">
                         <div class="flex justify-between text-sm">
-                            <dt class="text-[var(--color-text-secondary)]">Subtotal productos</dt>
+                            <dt class="text-[var(--color-text-secondary)]">Subtotal (sin IVA)</dt>
                             <dd class="text-[var(--color-text-primary)] font-medium">
-                                <?= number_format($totals['total'], 2, ',', '.') ?> €
+                                <?= number_format($totals['subtotal'], 2, ',', '.') ?> €
                             </dd>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <dt class="text-[var(--color-text-secondary)]">IVA</dt>
-                            <dd class="text-[var(--color-text-primary)] font-medium">21%</dd>
+                            <dt class="text-[var(--color-text-secondary)]">IVA (21%)</dt>
+                            <dd class="text-[var(--color-text-primary)] font-medium">
+                                <?= number_format($totals['iva'], 2, ',', '.') ?> €
+                            </dd>
                         </div>
                         <div class="flex justify-between text-sm">
                             <dt class="text-[var(--color-text-secondary)]">Entrega</dt>

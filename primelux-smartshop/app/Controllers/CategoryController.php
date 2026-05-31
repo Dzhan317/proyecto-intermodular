@@ -29,10 +29,14 @@ class CategoryController extends Controller
         $sort = in_array($_GET['sort'] ?? '', ['newest', 'price_asc', 'price_desc'])
                 ? $_GET['sort'] : 'newest';
 
+        // $rangeMax es el techo entero que usa el slider (ceil del máximo real)
+        // Si el usuario no filtra o pone el slider en su máximo, $maxPrice queda en 0
+        // para que buildFilters no aplique el filtro y no excluya productos por redondeo
+        $rangeMax = (int) ceil($priceRange['max']);
         $minPrice = max($priceRange['min'], (float) ($_GET['min_price'] ?? 0));
         $maxPrice = (float) ($_GET['max_price'] ?? 0);
-        if ($maxPrice <= 0 || $maxPrice > $priceRange['max']) $maxPrice = $priceRange['max'];
-        if ($minPrice > $maxPrice) $minPrice = $priceRange['min'];
+        if ($maxPrice <= 0 || (int) $maxPrice >= $rangeMax) $maxPrice = 0;
+        if ($minPrice > ($maxPrice ?: $priceRange['max'])) $minPrice = $priceRange['min'];
 
         $inStock = isset($_GET['in_stock']) && $_GET['in_stock'] === '1';
 
@@ -44,9 +48,11 @@ class CategoryController extends Controller
         $selectedBrands = array_values($selectedBrands);
 
         $page  = max(1, (int) ($_GET['page'] ?? 1));
-        $total = $productModel->countByCategory(
+        $total           = $productModel->countByCategory(
             $category['id'], $minPrice, $maxPrice, $inStock, $selectedBrands
         );
+        // Total sin filtros — para saber si la categoría tiene productos activos
+        $totalInCategory = $productModel->countByCategory($category['id'], 0, 0, false, []);
         $pages    = max(1, (int) ceil($total / self::PER_PAGE));
         $page     = min($page, $pages);
         $products = $productModel->getByCategory(
@@ -54,10 +60,13 @@ class CategoryController extends Controller
             $minPrice, $maxPrice, $inStock, $selectedBrands
         );
 
+        // $maxPrice = 0 significa "sin límite superior" — el slider debe mostrar el máximo
+        $maxPriceDisplay = $maxPrice > 0 ? $maxPrice : $priceRange['max'];
+
         $hasActiveFilters = $inStock
             || !empty($selectedBrands)
             || $minPrice > $priceRange['min']
-            || $maxPrice < $priceRange['max'];
+            || ($maxPrice > 0 && $maxPrice < $priceRange['max']);
 
         $this->view('products.listing', [
             'pageTitle'       => htmlspecialchars($category['name']) . ' | PrimeLux SmartShop',
@@ -69,11 +78,12 @@ class CategoryController extends Controller
             'total'           => $total,
             'priceRange'      => $priceRange,
             'minPrice'        => $minPrice,
-            'maxPrice'        => $maxPrice,
+            'maxPrice'        => $maxPriceDisplay,
             'inStock'         => $inStock,
             'availableBrands' => $availableBrands,
             'selectedBrands'  => $selectedBrands,
             'hasActiveFilters' => $hasActiveFilters,
+            'totalInCategory'  => $totalInCategory,
         ]);
     }
 }

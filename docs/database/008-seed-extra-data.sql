@@ -213,11 +213,4 @@ INSERT INTO product_images (product_id, image_url, is_main)
 SELECT id, '/assets/img/products/accessories/mochila-urbana-20l-interior.webp', 0
 FROM products WHERE slug = 'mochila-urbana-20l';
 
--- ── Categoría de sistema: Sin categoría ─────────────────
--- ID fijo 19 — referenciado como CategoryModel::UNCATEGORIZED_ID
--- Inactiva y protegida: no aparece en tienda ni puede eliminarse
--- Se usa para reasignar productos al eliminar una categoría con productos
-INSERT INTO categories (id, name, slug, description, parent_id, status, featured) VALUES
-(19, 'Sin categoría', 'sin-categoria', 'Categoría de sistema para productos sin categoría asignada', NULL, 'inactive', 0);
-
 SET FOREIGN_KEY_CHECKS = 1;

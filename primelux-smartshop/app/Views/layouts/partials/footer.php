@@ -1,9 +1,9 @@
 <?php
 $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/Controllers/SupportController.php');
 ?>
-<footer class="bg-[var(--color-bg-secondary)] border-t border-[var(--color-divider)] mt-auto">
+<footer class="bg-[var(--color-bg-surface)] border-t border-[var(--color-divider)] mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-10">
 
             <!-- Marca -->
             <div>
@@ -12,33 +12,33 @@ $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/
                      class="h-16 w-auto mb-4">
 
                 <p class="text-[var(--color-text-muted)] text-sm leading-relaxed">
-                    Tu supermercado digital de confianza.<br>
-                    Venta online de productos.
+                    Tu tienda online de confianza.<br>
+                    Descubre productos premium para cada necesidad.
                 </p>
             </div>
 
             <!-- Atención al cliente -->
-            <div>
+            <div class="border-t border-[var(--color-divider)] pt-6 md:border-0 md:pt-0">
                 <h3 class="text-[var(--color-text-primary)] text-sm font-semibold mb-4 uppercase tracking-wider">
                     Atención al cliente
                 </h3>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Contacto</a></li>
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Preguntas frecuentes</a></li>
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Envíos y devoluciones</a></li>
-                    <?php if ($supportEnabled): ?><li><a href="<?= APP_URL ?>/support" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Soporte</a></li><?php else: ?><li><span class="text-[var(--color-text-disabled)] text-sm cursor-not-allowed">Soporte (próximamente)</span></li><?php endif; ?>
+                    <li><a href="<?= APP_URL ?>/about" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Contacto</a></li>
+                    <li><a href="<?= APP_URL ?>/faq" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Preguntas frecuentes</a></li>
+                    <li><a href="<?= APP_URL ?>/shipping" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Envíos y devoluciones</a></li>
+                    <?php if ($supportEnabled): ?><li><a href="<?= APP_URL ?>/support" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Soporte</a></li><?php else: ?><li><span class="text-[var(--color-text-disabled)] text-sm cursor-not-allowed">Soporte (próximamente)</span></li><?php endif; ?>
                 </ul>
             </div>
 
             <!-- Legal -->
-            <div>
+            <div class="border-t border-[var(--color-divider)] pt-6 md:border-0 md:pt-0">
                 <h3 class="text-[var(--color-text-primary)] text-sm font-semibold mb-4 uppercase tracking-wider">
                     Legal
                 </h3>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Política de privacidad</a></li>
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Política de cookies</a></li>
-                    <li><a href="#" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-sm transition-colors">Términos y condiciones</a></li>
+                    <li><a href="<?= APP_URL ?>/legal/privacy" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Política de privacidad</a></li>
+                    <li><a href="<?= APP_URL ?>/legal/cookies" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Política de cookies</a></li>
+                    <li><a href="<?= APP_URL ?>/legal/terms" class="text-[var(--color-text-secondary)] hover:text-white text-sm transition-colors">Términos y condiciones</a></li>
                 </ul>
             </div>
 
@@ -54,7 +54,7 @@ $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/
             <div class="flex items-center gap-3">
                 <a href="#" aria-label="X (Twitter)"
                    class="w-9 h-9 rounded-full bg-[var(--color-bg-card)] flex items-center justify-center
-                          text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)] transition-colors">
+                          text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-hover)] transition-colors">
                     <!-- X logo -->
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401
@@ -63,7 +63,7 @@ $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/
                 </a>
                 <a href="#" aria-label="Instagram"
                    class="w-9 h-9 rounded-full bg-[var(--color-bg-card)] flex items-center justify-center
-                          text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)] transition-colors">
+                          text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-hover)] transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919
                                  4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149
@@ -81,7 +81,7 @@ $supportEnabled = class_exists('SupportController') || file_exists(APP_PATH . '/
                 </a>
                 <a href="#" aria-label="WhatsApp"
                    class="w-9 h-9 rounded-full bg-[var(--color-bg-card)] flex items-center justify-center
-                          text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)] transition-colors">
+                          text-[var(--color-text-secondary)] hover:text-white hover:bg-[var(--color-bg-hover)] transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94
                                  1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198

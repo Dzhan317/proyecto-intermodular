@@ -3,25 +3,10 @@ declare(strict_types=1);
 
 /*
  * Gestiona el carrito de compra basado en sesión PHP.
- * Las tablas carts/cart_items de la BD quedan como base para una
- * futura migración a carrito persistente (ver 012-cart-persistence-deferred.md).
- *
- * Estructura de $_SESSION['cart']:
- * [
- *   'items' => [
- *     variant_id (string) => [
- *       'product_id'   => int,
- *       'variant_id'   => int,
- *       'variant_name' => string,
- *       'name'         => string,
- *       'price'        => float,
- *       'quantity'     => int,
- *       'image_url'    => string|null,
- *       'slug'         => string,
- *       'stock'        => int,   // snapshot del stock al añadir — se refresca en update()
- *     ]
- *   ]
- * ]
+ * Motor de recomendaciones — Mejora 2:
+ *   Al añadir un producto al carrito se registra una interacción tipo 'cart'
+ *   y se actualiza user_interests con peso WEIGHT_CART (3 puntos).
+ *   Esto pondera más el interés del usuario que una simple vista.
  */
 
 require_once APP_PATH . '/Models/ProductModel.php';
@@ -91,7 +76,7 @@ class CartController extends Controller
         if (isset($items[$key])) {
             $newQty              = $items[$key]['quantity'] + $quantity;
             $items[$key]['quantity'] = min($newQty, $maxStock);
-            $items[$key]['stock']    = $maxStock; // refresca snapshot
+            $items[$key]['stock']    = $maxStock;
         } else {
             $items[$key] = [
                 'product_id'   => (int) $product['id'],
@@ -106,7 +91,19 @@ class CartController extends Controller
             ];
         }
 
-        $this->logCartInteraction((int) $product['id']);
+        // Mejora 2 — registra interacción tipo 'cart' con peso 3
+        $userId = (int) $_SESSION['user_id'];
+        $productId = (int) $product['id'];
+        $productModel->recordInteraction($userId, $productId, 'cart');
+
+        // Actualiza interés por categoría con peso CART (3 puntos)
+        if (!empty($product['category_slug'])) {
+            require_once APP_PATH . '/Models/CategoryModel.php';
+            $cat = (new CategoryModel())->getBySlug($product['category_slug']);
+            if ($cat) {
+                $productModel->updateUserInterest($userId, (int) $cat['id'], 'cart');
+            }
+        }
 
         $_SESSION['cart_success'] = '¡Producto añadido al carrito!';
         $this->redirect(APP_URL . '/cart');
@@ -129,12 +126,10 @@ class CartController extends Controller
 
         $item = &$_SESSION['cart']['items'][$variantId];
 
-        // Refresca el stock real desde BD para evitar superar el disponible
         $productModel = new ProductModel();
         $variant      = $productModel->getDefaultVariant($item['product_id']);
         $maxStock     = $variant ? (int) $variant['stock'] : ($item['stock'] ?? 1);
 
-        // Actualiza snapshot de stock y aplica límite
         $item['stock']    = $maxStock;
         $item['quantity'] = min($quantity, $maxStock);
 
@@ -202,17 +197,6 @@ class CartController extends Controller
             'item_count'    => $itemCount,
             'product_count' => count($items),
         ];
-    }
-
-    private function logCartInteraction(int $productId): void
-    {
-        try {
-            Database::getInstance()
-                ->prepare('INSERT INTO interactions (user_id, product_id, type) VALUES (?, ?, "cart")')
-                ->execute([(int) $_SESSION['user_id'], $productId]);
-        } catch (\Throwable $e) {
-            error_log('[CartController] Interacción no registrada: ' . $e->getMessage());
-        }
     }
 
     private function getRelatedProducts(array $items): array

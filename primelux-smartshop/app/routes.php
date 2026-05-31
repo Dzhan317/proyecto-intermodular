@@ -7,10 +7,17 @@ declare(strict_types=1);
 
 // Públicas
 $router->get('/',               'HomeController@index');
-$router->get('/sobre-nosotros', 'HomeController@about');
+$router->get('/about', 'HomeController@about');
 $router->get('/products',       'ProductController@index');
 $router->get('/products/:slug', 'ProductController@show');
 $router->get('/category/:slug', 'CategoryController@show');
+
+// Páginas estáticas
+$router->get('/faq',               'HomeController@faq');
+$router->get('/shipping',            'HomeController@envios');
+$router->get('/legal/privacy',  'HomeController@privacidad');
+$router->get('/legal/cookies',  'HomeController@cookies');
+$router->get('/legal/terms',    'HomeController@terminos');
 
 // Autenticación
 $router->get( '/login',                 'AuthController@loginForm');
@@ -53,11 +60,13 @@ $router->post('/checkout/payment',  'CheckoutController@initiatePayment');
 $router->get( '/checkout/success',  'CheckoutController@success');
 $router->get( '/checkout/cancel',   'CheckoutController@cancel');
 
-// Soporte — Fase 9 (pendiente de implementar)
-// $router->get( '/support',             'SupportController@index');
-// $router->post('/support',             'SupportController@create');
-// $router->get( '/support/:id',         'SupportController@show');
-// $router->post('/support/:id/message', 'SupportController@sendMessage');
+// Soporte — Fase 9
+$router->get( '/support',                       'SupportController@index');
+$router->post('/support',                       'SupportController@create');
+$router->get( '/support/unread',                'SupportController@unreadCount');
+$router->get( '/support/:id',                   'SupportController@show');
+$router->get( '/support/:id/messages',          'SupportController@getMessages');
+$router->post('/support/:id/message',           'SupportController@sendMessage');
 
 // Admin — Panel de administración (Fase 7)
 $router->get( '/admin',                       'AdminController@dashboard');
@@ -72,6 +81,7 @@ $router->post('/admin/products/:id/delete',   'AdminController@deleteProduct');
 
 // Admin — Pedidos
 $router->get( '/admin/orders',                'AdminController@orders');
+$router->get( '/admin/orders/:id',            'AdminController@showOrder');
 $router->post('/admin/orders/:id',            'AdminController@updateOrderStatus');
 
 // Admin — Usuarios
@@ -85,3 +95,11 @@ $router->post('/admin/categories/create',     'AdminController@storeCategory');
 $router->get( '/admin/categories/:id/edit',   'AdminController@editCategory');
 $router->post('/admin/categories/:id/edit',   'AdminController@updateCategory');
 $router->post('/admin/categories/:id/delete', 'AdminController@deleteCategory');
+
+// Admin — Soporte
+$router->get( '/admin/support',                    'AdminController@support');
+$router->get( '/admin/support/unread',             'AdminController@getSupportUnread');
+$router->get( '/admin/support/:id',                'AdminController@showSupportTicket');
+$router->get( '/admin/support/:id/messages',       'AdminController@getSupportMessages');
+$router->post('/admin/support/:id/message',        'AdminController@replySupport');
+$router->post('/admin/support/:id/status',         'AdminController@updateSupportStatus');

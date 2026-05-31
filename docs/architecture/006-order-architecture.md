@@ -60,16 +60,13 @@ CheckoutController::success()
   ├── Llama a OrderModel::createFromCheckout()
   │     ├── INSERT orders         → pedido principal
   │     ├── INSERT order_items    → una fila por producto del carrito
-  │     ├── UPDATE variants       → descuenta el stock de cada variante
   │     └── INSERT payments       → registro del pago de Stripe
   ├── Llama a OrderModel::saveAddress()  → guarda dirección en addresses
   ├── Vacía $_SESSION['cart'] y $_SESSION['checkout']
   └── Redirige a /checkout/success
 ```
 
-`createFromCheckout()` ejecuta las cuatro operaciones dentro de una **transacción PDO**. Si cualquier operación falla, el `rollBack()` garantiza que no queda ningún registro parcial en la BD ni el stock descontado sin pedido creado.
-
-El descuento de stock usa `GREATEST(0, stock - ?)` para evitar que el stock baje de cero en caso de concurrencia.
+`createFromCheckout()` ejecuta las tres inserciones dentro de una **transacción PDO**. Si cualquier INSERT falla, el `rollBack()` garantiza que no queda ningún registro parcial en la BD.
 
 ---
 
@@ -106,5 +103,4 @@ Solo el administrador puede cambiar el estado desde el panel admin. El usuario n
 ## Separación de responsabilidades
 
 `CheckoutController` crea pedidos. `OrderController` los muestra.
-`AdminController` los gestiona. 
-`OrderModel` es el único punto de acceso a las tablas `orders`, `order_items` y `payments` — ningún controlador ejecuta SQL directamente sobre estas tablas.
+`AdminController` los gestiona. `OrderModel` es el único punto de acceso a las tablas `orders`, `order_items` y `payments` — ningún controlador ejecuta SQL directamente sobre estas tablas.

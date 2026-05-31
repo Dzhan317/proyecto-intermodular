@@ -30,7 +30,7 @@
 <body class="bg-[var(--color-bg-main)] text-[var(--color-text-primary)] min-h-screen flex flex-col font-sora">
 
     <!-- Header simplificado — solo logo e icono carrito -->
-    <header class="bg-[var(--color-bg-secondary)] border-b border-[var(--color-divider)]">
+    <header class="bg-[var(--color-bg-surface)] border-b border-[var(--color-divider)]">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="<?= APP_URL ?>/">
@@ -52,7 +52,7 @@
     </header>
 
     <!-- ── Stepper ───────────────────────────────────────────────────────────── -->
-    <div class="bg-[var(--color-bg-secondary)] border-b border-[var(--color-divider)]">
+    <div class="bg-[var(--color-bg-surface)] border-b border-[var(--color-divider)]">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
             <?php

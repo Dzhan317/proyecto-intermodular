@@ -89,7 +89,15 @@ $s = $statusMap[$order['status']] ?? ['label' => ucfirst($order['status']), 'col
                 </div>
                 <div class="flex justify-between items-center">
                     <p class="text-xs text-[var(--color-text-muted)]">
-                        Envío: <?= htmlspecialchars(ucfirst($order['shipping_type'])) ?>
+                        <?php
+                        $shippingLabels = [
+                            'standard'     => 'Envío estándar',
+                            'express'      => 'Envío express',
+                            'pickup_point' => 'Recogida en tienda',
+                        ];
+                        $shippingLabel = $shippingLabels[$order['shipping_type']] ?? ucfirst($order['shipping_type']);
+                        ?>
+                        Envío: <?= htmlspecialchars($shippingLabel) ?>
                         (<?= number_format((float) $order['shipping_cost'], 2, ',', '.') ?> €)
                     </p>
                     <p class="text-base font-bold text-[var(--color-warning)]">

@@ -13,6 +13,12 @@ ob_start();
     Introduce tu correo para iniciar sesión o crear una cuenta.
 </p>
 
+<?php if (!empty($expired)): ?>
+    <div class="mb-4 p-3 alert-error rounded-xl text-sm">
+        <?= htmlspecialchars($expired) ?>
+    </div>
+<?php endif; ?>
+
 <form method="POST" action="<?= APP_URL ?>/auth/check-email" novalidate>
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
 
@@ -48,4 +54,4 @@ ob_start();
 
 <?php
 $content = ob_get_clean();
-require_once APP_PATH . '/Views/layouts/auth.php';
+require APP_PATH . '/Views/layouts/auth.php';
